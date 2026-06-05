@@ -123,15 +123,33 @@ class XacThucController extends Controller
             'phong_giong_anh' => 'required|boolean',
             'nuoc_sach' => 'required|boolean',
             'an_ninh' => 'required|boolean',
-            'ghi_chu_thuc_dia' => 'nullable|string'
+            'ghi_chu_thuc_dia' => 'nullable|string',
+            'anh_thuc_dia' => 'required|array|min:1',
+            'anh_thuc_dia.*' => 'image|mimes:jpeg,png,jpg|max:5120',
+        ], [
+            'anh_thuc_dia.required' => 'Vui lòng tải lên ít nhất 1 ảnh thực địa đối chứng.',
+            'anh_thuc_dia.min' => 'Vui lòng tải lên ít nhất 1 ảnh thực địa đối chứng.',
+            'anh_thuc_dia.*.image' => 'File tải lên phải là hình ảnh.',
+            'anh_thuc_dia.*.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg.',
+            'anh_thuc_dia.*.max' => 'Kích thước mỗi ảnh tối đa là 5MB.',
         ]);
+
+        $anhUrls = [];
+        if ($request->hasFile('anh_thuc_dia')) {
+            foreach ($request->file('anh_thuc_dia') as $file) {
+                $path = $file->store('thuc_dia', 'public');
+                $this->applyWatermark($path);
+                $anhUrls[] = Storage::disk('public')->url($path);
+            }
+        }
 
         // 1. Tạo mảng Checklist
         $baoCaoChiTiet = [
             'phong_giong_anh' => $request->boolean('phong_giong_anh'),
             'nuoc_sach' => $request->boolean('nuoc_sach'),
             'an_ninh' => $request->boolean('an_ninh'),
-            'ghi_chu' => $request->input('ghi_chu_thuc_dia')
+            'ghi_chu' => $request->input('ghi_chu_thuc_dia'),
+            'hinh_anh' => $anhUrls
         ];
 
         DB::beginTransaction();

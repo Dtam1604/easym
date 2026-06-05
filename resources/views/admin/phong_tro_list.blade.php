@@ -65,6 +65,12 @@
                         <span class="font-medium text-sm">Quản lý Tài khoản</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.ctv.index') }}" class="sidebar-item flex items-center px-6 py-3 transition-colors">
+                        <i class="fa-solid fa-user-gear w-6"></i>
+                        <span class="font-medium text-sm">Quản lý CTV (UC19)</span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </aside>

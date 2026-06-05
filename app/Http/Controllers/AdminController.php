@@ -359,4 +359,98 @@ class AdminController extends Controller
             return redirect()->route('admin.nguoidung.index')->with('error', 'Lỗi khi xóa tài khoản: ' . $e->getMessage());
         }
     }
+
+    /**
+     * UC19 - Quản lý danh sách Cộng tác viên (CTV)
+     */
+    public function ctvManageIndex()
+    {
+        $ctvs = NguoiDung::where('vai_tro', 'cong_tac_vien')
+            ->withCount('xacThucThucDias')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+            
+        return view('admin.ctv_list', compact('ctvs'));
+    }
+
+    /**
+     * UC19 - Thêm mới tài khoản CTV
+     */
+    public function ctvManageStore(Request $request)
+    {
+        $validated = $request->validate([
+            'ho_ten' => 'required|string|max:255',
+            'email' => 'required|email|unique:nguoi_dung,email',
+            'so_dien_thoai' => 'required|string|max:15|unique:nguoi_dung,so_dien_thoai',
+            'dia_ban_quan_ly' => 'nullable|string|max:255',
+        ], [
+            'ho_ten.required' => 'Vui lòng nhập họ tên.',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Email không đúng định dạng.',
+            'email.unique' => 'Email này đã tồn tại trong hệ thống.',
+            'so_dien_thoai.required' => 'Vui lòng nhập số điện thoại.',
+            'so_dien_thoai.unique' => 'Số điện thoại này đã tồn tại trong hệ thống.',
+        ]);
+
+        NguoiDung::create([
+            'ho_ten' => $validated['ho_ten'],
+            'email' => $validated['email'],
+            'so_dien_thoai' => $validated['so_dien_thoai'],
+            'dia_ban_quan_ly' => $validated['dia_ban_quan_ly'],
+            'vai_tro' => 'cong_tac_vien',
+            'mat_khau' => bcrypt('123456'), // Mật khẩu mặc định là 123456
+            'trang_thai_khoa' => false,
+        ]);
+
+        return redirect()->back()->with('success', 'Đã tạo tài khoản Cộng tác viên thành công! Mật khẩu mặc định là: 123456');
+    }
+
+    /**
+     * UC19 - Khóa/Mở khóa tài khoản CTV
+     */
+    public function ctvManageToggleLock($id)
+    {
+        $ctv = NguoiDung::where('vai_tro', 'cong_tac_vien')->findOrFail($id);
+        $ctv->trang_thai_khoa = !$ctv->trang_thai_khoa;
+        $ctv->save();
+
+        $status = $ctv->trang_thai_khoa ? 'Khóa' : 'Mở khóa';
+        return redirect()->back()->with('success', "Đã {$status} tài khoản Cộng tác viên {$ctv->ho_ten} thành công!");
+    }
+
+    /**
+     * UC19 - Cập nhật phân vùng địa bàn quản lý cho CTV
+     */
+    public function ctvManageUpdateRegion(Request $request, $id)
+    {
+        $request->validate([
+            'dia_ban_quan_ly' => 'nullable|string|max:255'
+        ]);
+
+        $ctv = NguoiDung::where('vai_tro', 'cong_tac_vien')->findOrFail($id);
+        $ctv->dia_ban_quan_ly = $request->input('dia_ban_quan_ly');
+        $ctv->save();
+
+        return redirect()->back()->with('success', "Đã cập nhật địa bàn quản lý cho CTV {$ctv->ho_ten} thành công!");
+    }
+
+    /**
+     * Khóa/Mở khóa tài khoản bất kỳ (Admin, Chủ trọ, Người tìm trọ, CTV)
+     */
+    public function userToggleLock($id)
+    {
+        try {
+            if ($id == auth()->id()) {
+                return redirect()->back()->with('error', 'Bạn không thể tự khóa tài khoản của chính mình!');
+            }
+            $user = NguoiDung::findOrFail($id);
+            $user->trang_thai_khoa = !$user->trang_thai_khoa;
+            $user->save();
+
+            $status = $user->trang_thai_khoa ? 'Khóa' : 'Mở khóa';
+            return redirect()->back()->with('success', "Đã {$status} tài khoản {$user->ho_ten} thành công!");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Lỗi khi thay đổi trạng thái khóa tài khoản: ' . $e->getMessage());
+        }
+    }
 }

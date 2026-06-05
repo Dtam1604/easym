@@ -28,6 +28,15 @@ Route::get('/storage/kyc/{filename}', function ($filename) {
     abort(404);
 });
 
+// Cung cấp trực tiếp ảnh thực địa ra ngoài mà không bị chặn bởi route nội bộ của Laravel
+Route::get('/storage/thuc_dia/{filename}', function ($filename) {
+    $filePath = storage_path('app/public/thuc_dia/' . $filename);
+    if (file_exists($filePath)) {
+        return response()->file($filePath);
+    }
+    abort(404);
+});
+
 // Chuyển hướng trang chủ mặc định vào thẳng màn hình Tìm kiếm phòng trọ
 Route::get('/', function() {
     return redirect()->route('search.results');
@@ -84,6 +93,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('/tim-ban-o-ghep/ket-noi/{id}', [TimBanController::class, 'guiLoiMoi']);
         Route::post('/tim-ban-o-ghep/chap-nhan/{id}', [TimBanController::class, 'chapNhanLoiMoi']);
         Route::post('/tim-ban-o-ghep/tu-choi/{id}', [TimBanController::class, 'tuChoiLoiMoi']);
+        Route::post('/tim-ban-o-ghep/huy-ket-noi/{id}', [TimBanController::class, 'huyKetNoi']);
     });
 
     // Nhóm tính năng cho CHỦ TRỌ
@@ -152,6 +162,13 @@ Route::middleware('auth.role:admin')->prefix('admin')->group(function() {
     // Quản lý Tài khoản (Người dùng)
     Route::get('/nguoi-dung', [AdminController::class, 'nguoidungIndex'])->name('admin.nguoidung.index');
     Route::delete('/nguoi-dung/{id}', [AdminController::class, 'nguoidungDestroy'])->name('admin.nguoidung.destroy');
+    Route::post('/nguoi-dung/{id}/toggle-lock', [AdminController::class, 'userToggleLock'])->name('admin.nguoidung.toggle_lock');
+
+    // Quản lý Cộng tác viên (UC19)
+    Route::get('/ctv-list', [AdminController::class, 'ctvManageIndex'])->name('admin.ctv.index');
+    Route::post('/ctv-list', [AdminController::class, 'ctvManageStore'])->name('admin.ctv.store');
+    Route::post('/ctv-list/{id}/toggle-lock', [AdminController::class, 'ctvManageToggleLock'])->name('admin.ctv.toggle_lock');
+    Route::post('/ctv-list/{id}/update-region', [AdminController::class, 'ctvManageUpdateRegion'])->name('admin.ctv.update_region');
 });
 
 // Các API gọi từ AJAX Frontend của Admin Dashboard

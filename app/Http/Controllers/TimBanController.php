@@ -31,11 +31,23 @@ class TimBanController extends Controller
                 return response()->json(['message' => 'Người dùng không tồn tại.'], 404);
             }
 
+            // Nếu người dùng hiện tại chưa điền khảo sát lối sống
+            if (empty($nguoiDungHienTai->khao_sat_loi_song)) {
+                return view('pro_search.roommates', [
+                    'nguoiDungHienTai' => $nguoiDungHienTai,
+                    'ds_goi_y' => [],
+                    'trangThaiKetNoi' => [],
+                    'loiMoiChoDuyet' => collect(),
+                ]);
+            }
+
             // 1. HARD FILTER: Lọc theo vai trò và Giới tính
             // Lấy danh sách những người tìm trọ khác, và BẮT BUỘC cùng giới tính
             // Cập nhật: Loại bỏ 'chu_tro' và 'admin' ra khỏi danh sách gợi ý ở ghép
+            // Đồng thời: Chỉ lấy những người đã điền khảo sát lối sống
             $query = NguoiDung::where('id', '!=', $idNguoiDung)
-                              ->where('vai_tro', 'nguoi_tim_tro');
+                              ->where('vai_tro', 'nguoi_tim_tro')
+                              ->whereNotNull('khao_sat_loi_song');
 
             // Nếu người dùng hiện tại có giới tính, thì chỉ tìm người cùng giới tính (Mặc định)
             // Cập nhật: Cho phép chọn giới tính từ bộ lọc
@@ -82,6 +94,12 @@ class TimBanController extends Controller
 
             // 2. TÍNH ĐIỂM TƯƠNG ĐỒNG LỐI SỐNG (Roommate Matching Algorithm)
             foreach ($danhSachTiemNang as $nguoiTiemNang) {
+                // Kiểm tra xem ứng viên này đã điền khảo sát chưa
+                $loiSongB = $nguoiTiemNang->khao_sat_loi_song ?? [];
+                if (empty($loiSongB)) {
+                    continue; // Bỏ qua nếu họ chưa điền khảo sát
+                }
+
                 $diemSo = $this->tinhDiemMatching($nguoiDungHienTai, $nguoiTiemNang, $danhSachTrongSo);
 
                 if ($diemSo > 0) {
@@ -157,7 +175,7 @@ class TimBanController extends Controller
             $loiSongB = $userB->khao_sat_loi_song ?? [];
 
             if (empty($loiSongA) || empty($loiSongB)) {
-                return 10.0; // Điểm cơ bản nếu 1 trong 2 chưa làm khảo sát
+                return 0.0; // Không hiển thị nếu chưa làm khảo sát
             }
 
             // --- CƠ CHẾ RÀNG BUỘC THÍCH ỨNG (ADAPTIVE CONSTRAINTS) - HARD FILTER ---
@@ -362,6 +380,42 @@ class TimBanController extends Controller
                 return response()->json(['success' => true, 'message' => 'Đã từ chối lời mời kết nối.']);
             }
             return response()->json(['success' => false, 'message' => 'Không tìm thấy lời mời.'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Lỗi máy chủ.'], 500);
+        }
+    }
+
+    /**
+     * AJAX: Hủy kết nối bạn cùng phòng
+     */
+    public function huyKetNoi($id)
+    {
+        try {
+            $idNguoiDung = auth()->id();
+            
+            // Tìm lời mời kết nối giữa 2 người có trạng thái chap_nhan
+            $loiMoi = \App\Models\LoiMoiOGhep::where(function($q) use ($idNguoiDung, $id) {
+                $q->where('id_nguoi_gui', $idNguoiDung)->where('id_nguoi_nhan', $id);
+            })->orWhere(function($q) use ($idNguoiDung, $id) {
+                $q->where('id_nguoi_gui', $id)->where('id_nguoi_nhan', $idNguoiDung);
+            })
+            ->where('trang_thai', 'chap_nhan')
+            ->first();
+
+            if ($loiMoi) {
+                // Gửi thông báo cho người kia trước khi xóa
+                $otherId = $loiMoi->id_nguoi_gui == $idNguoiDung ? $loiMoi->id_nguoi_nhan : $loiMoi->id_nguoi_gui;
+                $nguoiKia = NguoiDung::find($otherId);
+                if ($nguoiKia) {
+                    $msg = auth()->user()->ho_ten . ' đã hủy kết nối bạn cùng phòng với bạn.';
+                    $nguoiKia->notify(new \App\Notifications\LoiMoiOGhepNotification($loiMoi, $msg, 'huy_ket_noi'));
+                }
+
+                $loiMoi->delete(); // Xóa hoàn toàn để reset trạng thái kết nối
+                
+                return response()->json(['success' => true, 'message' => 'Đã hủy kết nối bạn cùng phòng thành công.']);
+            }
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy kết nối bạn cùng phòng giữa hai người.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Lỗi máy chủ.'], 500);
         }

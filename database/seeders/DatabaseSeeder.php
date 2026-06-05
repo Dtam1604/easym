@@ -107,5 +107,8 @@ class DatabaseSeeder extends Seeder
             ['ten_tieu_chi' => 'ban_be_den_choi', 'trong_so_nen' => 1.5, 'he_so_uu_tien' => 1.5],
         ];
         DB::table('trong_so_thuat_toan')->insert($weights);
+
+        // 4. Tạo thêm nhiều tài khoản người tìm trọ
+        $this->call(NguoiTimTroSeeder::class);
     }
 }

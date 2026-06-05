@@ -4,6 +4,10 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .group-connected:hover .group-connected-default { display: none; }
+    .group-connected:hover .group-connected-hover { display: inline; }
+</style>
 @endpush
 
 @section('content')
@@ -94,11 +98,19 @@
             <div class="w-32 h-32 mx-auto bg-blue-50 rounded-full flex items-center justify-center mb-6">
                 <i class="fa-solid fa-user-group text-5xl text-blue-300"></i>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Chưa tìm thấy người phù hợp</h3>
-            <p class="text-gray-500 mb-6">Bạn hãy thử mở rộng tiêu chí hoặc cập nhật lại bài Khảo sát lối sống nhé.</p>
-            <a href="/khao-sat-loi-song" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
-                <i class="fa-solid fa-clipboard-list mr-2"></i> Làm lại Khảo sát
-            </a>
+            @if(empty($nguoiDungHienTai->khao_sat_loi_song))
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Bạn chưa thực hiện khảo sát lối sống</h3>
+                <p class="text-gray-500 mb-6">Hãy thực hiện khảo sát lối sống để hệ thống tìm kiếm bạn ở ghép phù hợp nhất.</p>
+                <a href="/khao-sat-loi-song" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
+                    <i class="fa-solid fa-clipboard-list mr-2"></i> Thực hiện Khảo sát
+                </a>
+            @else
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Chưa tìm thấy người phù hợp</h3>
+                <p class="text-gray-500 mb-6">Bạn hãy thử mở rộng tiêu chí hoặc cập nhật lại bài Khảo sát lối sống nhé.</p>
+                <a href="/khao-sat-loi-song" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
+                    <i class="fa-solid fa-clipboard-list mr-2"></i> Làm lại Khảo sát
+                </a>
+            @endif
         </div>
         @else
         <!-- Lưới User Cards -->
@@ -232,8 +244,9 @@
                         @endif
                         
                         @if($trangThai == 'connected')
-                            <button disabled class="w-full bg-emerald-100 text-emerald-700 font-bold py-2.5 rounded-xl border border-emerald-200 cursor-default">
-                                <i class="fa-solid fa-user-group mr-1"></i> Bạn cùng phòng
+                            <button onclick="huyKetNoiRoommate({{ $nguoi->id }}, '{{ $nguoi->ho_ten }}')" class="w-full bg-emerald-100 text-emerald-700 font-bold py-2.5 rounded-xl border border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-300 group-connected">
+                                <span class="group-connected-default"><i class="fa-solid fa-user-group mr-1"></i> Bạn cùng phòng</span>
+                                <span class="group-connected-hover hidden"><i class="fa-solid fa-user-slash mr-1"></i> Hủy kết nối</span>
                             </button>
                         @elseif($trangThai == 'sent')
                             <button disabled class="w-full bg-gray-100 text-gray-500 font-bold py-2.5 rounded-xl border border-gray-200 cursor-not-allowed">
@@ -326,6 +339,33 @@
             console.error('Error:', error);
             alert('Lỗi mạng. Vui lòng thử lại.');
             row.style.opacity = '1';
+        });
+    }
+
+    function huyKetNoiRoommate(idRoommate, name) {
+        if (!confirm(`Bạn có chắc chắn muốn hủy kết nối bạn cùng phòng với ${name} không?`)) {
+            return;
+        }
+
+        fetch(`/tim-ban-o-ghep/huy-ket-noi/${idRoommate}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Lỗi mạng. Vui lòng thử lại.');
         });
     }
 </script>

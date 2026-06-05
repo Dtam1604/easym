@@ -65,6 +65,12 @@
                         <span class="font-medium text-sm">Quản lý Tài khoản</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.ctv.index') }}" class="sidebar-item flex items-center px-6 py-3 transition-colors">
+                        <i class="fa-solid fa-user-gear w-6"></i>
+                        <span class="font-medium text-sm">Quản lý CTV (UC19)</span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </aside>
@@ -136,6 +142,11 @@
                                                 @if($user->da_xac_thuc_cccd)
                                                     <i class="fa-solid fa-circle-check text-blue-500 text-xs" title="Đã xác thực"></i>
                                                 @endif
+                                                @if($user->trang_thai_khoa)
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700 border border-red-200 uppercase ml-1">
+                                                        Bị khóa
+                                                    </span>
+                                                @endif
                                             </div>
                                             <div class="text-xs text-gray-500">{{ $user->email }}</div>
                                             @if($user->so_dien_thoai)
@@ -175,13 +186,32 @@
                                 </td>
                                 <td class="p-4 align-middle text-center">
                                     @if($user->id !== auth()->id())
-                                    <form action="{{ route('admin.nguoidung.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản này vĩnh viễn không? Các dữ liệu liên quan cũng có thể bị mất.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded text-xs font-bold transition-colors border border-red-200 hover:border-red-600">
-                                            <i class="fa-solid fa-trash-can mr-1"></i> Xóa
-                                        </button>
-                                    </form>
+                                    <div class="flex justify-center gap-2">
+                                        <!-- Khóa / Mở khóa -->
+                                        @if($user->trang_thai_khoa)
+                                            <form action="{{ route('admin.nguoidung.toggle_lock', $user->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn mở khóa tài khoản {{ $user->ho_ten }}? Người dùng này sẽ có thể tiếp tục truy cập hệ thống.');">
+                                                @csrf
+                                                <button type="submit" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded text-xs font-bold transition-colors border border-emerald-200 hover:border-emerald-600 shadow-sm flex items-center gap-1">
+                                                    <i class="fa-solid fa-unlock"></i> Mở khóa
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('admin.nguoidung.toggle_lock', $user->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản {{ $user->ho_ten }}? Người dùng này sẽ không thể tiếp tục truy cập hệ thống.');">
+                                                @csrf
+                                                <button type="submit" class="px-2.5 py-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-600 hover:text-white rounded text-xs font-bold transition-colors border border-yellow-200 hover:border-yellow-600 shadow-sm flex items-center gap-1">
+                                                    <i class="fa-solid fa-user-lock"></i> Khóa
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <form action="{{ route('admin.nguoidung.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản này vĩnh viễn không? Các dữ liệu liên quan cũng có thể bị mất.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded text-xs font-bold transition-colors border border-red-200 hover:border-red-600">
+                                                <i class="fa-solid fa-trash-can mr-1"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
                                     @else
                                     <span class="text-xs text-gray-400 italic">Tài khoản của bạn</span>
                                     @endif

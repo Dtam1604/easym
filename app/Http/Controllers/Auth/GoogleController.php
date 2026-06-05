@@ -35,6 +35,13 @@ class GoogleController extends Controller
                              ->first();
 
             if ($user) {
+                // Kiểm tra xem tài khoản có bị khóa không
+                if ($user->trang_thai_khoa) {
+                    return redirect()->route('login')->withErrors([
+                        'email' => 'Tài khoản của bạn đã bị khóa.',
+                    ]);
+                }
+
                 // Nếu user đã tồn tại (đăng ký thường hoặc đã liên kết Google trước đó)
                 // Cập nhật google_id và ảnh đại diện nếu chưa có
                 if (!$user->google_id) {

@@ -83,6 +83,12 @@
                         <span class="font-medium text-sm">Quản lý Tài khoản</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.ctv.index') }}" class="sidebar-item flex items-center px-6 py-3 transition-colors">
+                        <i class="fa-solid fa-user-gear w-6"></i>
+                        <span class="font-medium text-sm">Quản lý CTV</span>
+                    </a>
+                </li>
             </ul>
         </nav>
         <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
@@ -216,6 +222,20 @@
                                             <span class="{{ isset($chiTiet['nuoc_sach']) && $chiTiet['nuoc_sach'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['nuoc_sach']) && $chiTiet['nuoc_sach'] ? 'fa-check' : 'fa-xmark' }}"></i> Nước sạch</span>
                                             <span class="{{ isset($chiTiet['an_ninh']) && $chiTiet['an_ninh'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['an_ninh']) && $chiTiet['an_ninh'] ? 'fa-check' : 'fa-xmark' }}"></i> An ninh</span>
                                         </div>
+                                        @if(isset($chiTiet['hinh_anh']) && is_array($chiTiet['hinh_anh']) && count($chiTiet['hinh_anh']) > 0)
+                                            <div class="mt-3 pt-3 border-t border-blue-100">
+                                                <p class="font-bold text-gray-700 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-camera text-sky-500"></i> Ảnh chụp thực địa:</p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    @foreach($chiTiet['hinh_anh'] as $anh)
+                                                        <div class="relative group cursor-zoom-in">
+                                                            <img src="{{ $anh }}" class="w-16 h-16 rounded-lg object-cover border border-gray-200 transition-transform duration-200 group-hover:scale-105 shadow-sm"
+                                                                 @click="openLightbox('{{ $anh }}')">
+                                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity rounded-lg"></div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-2 w-full md:w-auto">
@@ -289,6 +309,13 @@
             </div>
         </div>
     </div>
+    <!-- Lightbox Modal for Field Photos -->
+    <div x-show="isLightboxOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-90" @click="isLightboxOpen = false">
+        <button class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img :src="lightboxImage" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl">
+    </div>
 </div>
 @endsection
 
@@ -303,6 +330,12 @@
         Alpine.data('adminDashboard', () => ({
             isModalOpen: false,
             currentLegalImages: [],
+            lightboxImage: '',
+            isLightboxOpen: false,
+            openLightbox(url) {
+                this.lightboxImage = url;
+                this.isLightboxOpen = true;
+            },
             
             // Xử lý Modal hiển thị JSONB ảnh
             openModal(roomId, imagesJsonString) {

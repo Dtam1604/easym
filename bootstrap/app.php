@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.role' => \App\Http\Middleware\PhanQuyenMiddleware::class
         ]);
+        
+        $middleware->appendToGroup('web', \App\Http\Middleware\CheckTaiKhoanKhoa::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

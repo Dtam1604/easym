@@ -54,6 +54,9 @@ class LoiMoiOGhepNotification extends Notification
                 $icon = 'fa-user-xmark';
                 $color = 'text-red-500';
             }
+        } elseif ($this->type === 'huy_ket_noi') {
+            $icon = 'fa-user-slash';
+            $color = 'text-orange-500';
         }
 
         return [

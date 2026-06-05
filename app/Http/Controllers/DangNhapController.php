@@ -33,10 +33,17 @@ class DangNhapController extends Controller
         // Cấu hình auth.php đã trỏ tới NguoiDung::class.
         // Eloquent ánh xạ 'password' sang cột 'mat_khau' qua hàm getAuthPassword() trong model
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['mat_khau']])) {
+            $user = Auth::user();
+            if ($user->trang_thai_khoa) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Tài khoản của bạn đã bị khóa.',
+                ])->onlyInput('email');
+            }
             $request->session()->regenerate();
 
             // Kiểm tra vai_tro để điều hướng
-            $vaiTro = Auth::user()->vai_tro;
+            $vaiTro = $user->vai_tro;
             if ($vaiTro === 'admin') {
                 return redirect('/admin');
             } elseif ($vaiTro === 'nguoi_tim_tro') {

@@ -49,6 +49,8 @@ class NguoiDung extends Authenticatable
         'so_dien_thoai',
         'thanh_pho',
         'vai_tro',
+        'dia_ban_quan_ly',
+        'trang_thai_khoa',
         'khao_sat_loi_song',
         'gioi_tinh',
         'nam_sinh',
@@ -79,6 +81,7 @@ class NguoiDung extends Authenticatable
             'khao_sat_loi_song' => 'array',
             'thong_tin_cccd' => 'array',
             'da_xac_thuc_cccd' => 'boolean',
+            'trang_thai_khoa' => 'boolean',
         ];
     }
 
@@ -132,6 +135,14 @@ class NguoiDung extends Authenticatable
     public function loiMoiNhanDuoc(): HasMany
     {
         return $this->hasMany(LoiMoiOGhep::class, 'id_nguoi_nhan');
+    }
+
+    /**
+     * Lấy danh sách các báo cáo thực địa do CTV này khảo sát.
+     */
+    public function xacThucThucDias(): HasMany
+    {
+        return $this->hasMany(XacThucThucDia::class, 'id_nguoi_xac_thuc');
     }
 
     /*

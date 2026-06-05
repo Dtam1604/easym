@@ -32,7 +32,7 @@
             </div>
 
             <!-- Report Form -->
-            <form action="{{ route('ctv.baocao.submit', $phong->id) }}" method="POST" class="p-8 space-y-8">
+            <form action="{{ route('ctv.baocao.submit', $phong->id) }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
                 @csrf
                 
                 <div>
@@ -95,6 +95,45 @@
                     </div>
                 </div>
 
+                <!-- Upload Ảnh Thực Địa -->
+                <div x-data="imageUploader()" class="border-t border-gray-100 pt-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Hình ảnh chụp đối chứng thực tế <span class="text-red-500">*</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mb-3">Vui lòng chụp ít nhất 1 hình ảnh thực tế của phòng trọ để làm căn cứ kiểm duyệt.</p>
+                    
+                    <div class="relative border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-6 transition-colors duration-200 bg-gray-50/50 flex flex-col items-center justify-center cursor-pointer"
+                         @click="$refs.fileInput.click()">
+                        <input type="file" ref="fileInput" name="anh_thuc_dia[]" id="anh_thuc_dia" multiple accept="image/*" class="hidden" @change="previewImages" required>
+                        
+                        <div class="text-center space-y-2">
+                            <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto text-blue-500 text-xl shadow-sm">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <div class="text-sm font-bold text-gray-700">Chọn hoặc Kéo thả ảnh vào đây</div>
+                            <div class="text-xs text-gray-400">Hỗ trợ JPG, PNG, JPEG. Tối đa 5MB/ảnh (Cần ít nhất 1 ảnh)</div>
+                        </div>
+                    </div>
+
+                    <!-- Previews Grid -->
+                    <template x-if="previews.length > 0">
+                        <div class="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                            <template x-for="(src, index) in previews" :key="index">
+                                <div class="relative aspect-square rounded-xl overflow-hidden border border-gray-200 group shadow-sm bg-white">
+                                    <img :src="src" class="w-full h-full object-cover">
+                                    <button type="button" @click.stop="removeImage(index)" 
+                                            class="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600 transition-colors shadow-md">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    @error('anh_thuc_dia')
+                        <p class="text-red-500 text-xs mt-1 font-bold">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div>
                     <label for="ghi_chu_thuc_dia" class="block text-sm font-bold text-gray-700 mb-2">Ghi chú thêm (Tùy chọn)</label>
                     <textarea id="ghi_chu_thuc_dia" name="ghi_chu_thuc_dia" rows="4" placeholder="Nhập nhận xét chi tiết của bạn về phòng trọ này..."
@@ -118,4 +157,39 @@
 
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('imageUploader', () => ({
+            previews: [],
+            files: [],
+            previewImages(event) {
+                const filesList = event.target.files;
+                if (!filesList) return;
+                for (let i = 0; i < filesList.length; i++) {
+                    const file = filesList[i];
+                    this.files.push(file);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.previews.push(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+                this.syncInput();
+            },
+            removeImage(index) {
+                this.previews.splice(index, 1);
+                this.files.splice(index, 1);
+                this.syncInput();
+            },
+            syncInput() {
+                const dt = new DataTransfer();
+                this.files.forEach(file => dt.items.add(file));
+                this.$refs.fileInput.files = dt.files;
+            }
+        }));
+    });
+</script>
+@endpush
 @endsection

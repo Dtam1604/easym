@@ -452,6 +452,10 @@ document.addEventListener('DOMContentLoaded', function() {
         margin: 0;
         padding: 12px;
     }
+    /* Đảm bảo chữ "Xem chi tiết" không bị mờ (trùng màu link mặc định của Leaflet) */
+    .custom-popup .leaflet-popup-content a {
+        color: #ffffff !important;
+    }
     .custom-popup .leaflet-popup-tip-container {
         display: none; /* Giấu mũi tên nhọn bên dưới cho hiện đại */
     }
