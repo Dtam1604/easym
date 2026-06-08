@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
                 'mat_khau' => Hash::make('123456'),
                 'so_dien_thoai' => '0934567890',
                 'vai_tro' => 'nguoi_tim_tro',
-                'khao_sat_loi_song' => json_encode(['gio_giac' => '23h', 'do_sach_se' => 5]),
+                'khao_sat_loi_song' => json_encode(['gio_giac' => 3, 'do_sach_se' => 5]),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -100,15 +100,18 @@ class DatabaseSeeder extends Seeder
 
         // 3. Khởi tạo Trọng số thuật toán
         $weights = [
-            ['ten_tieu_chi' => 'gio_giac', 'trong_so_nen' => 2.0, 'he_so_uu_tien' => 2.0],
-            ['ten_tieu_chi' => 'do_sach_se', 'trong_so_nen' => 1.5, 'he_so_uu_tien' => 1.5],
-            ['ten_tieu_chi' => 'hut_thuoc', 'trong_so_nen' => 3.0, 'he_so_uu_tien' => 2.5],
-            ['ten_tieu_chi' => 'nuoi_thu_cung', 'trong_so_nen' => 1.0, 'he_so_uu_tien' => 1.2],
-            ['ten_tieu_chi' => 'ban_be_den_choi', 'trong_so_nen' => 1.5, 'he_so_uu_tien' => 1.5],
+            ['ten_tieu_chi' => 'gio_giac', 'tieu_de_hien_thi' => 'Thói quen giờ giấc sinh hoạt', 'trong_so_nen' => 2.0, 'he_so_uu_tien' => 2.0],
+            ['ten_tieu_chi' => 'do_sach_se', 'tieu_de_hien_thi' => 'Mức độ sạch sẽ, ngăn nắp', 'trong_so_nen' => 1.5, 'he_so_uu_tien' => 1.5],
+            ['ten_tieu_chi' => 'hut_thuoc', 'tieu_de_hien_thi' => 'Mức độ hút thuốc lá', 'trong_so_nen' => 3.0, 'he_so_uu_tien' => 2.5],
+            ['ten_tieu_chi' => 'nuoi_thu_cung', 'tieu_de_hien_thi' => 'Mức độ yêu thích/nuôi thú cưng', 'trong_so_nen' => 1.0, 'he_so_uu_tien' => 1.2],
+            ['ten_tieu_chi' => 'ban_be_den_choi', 'tieu_de_hien_thi' => 'Tần suất dẫn bạn bè về phòng chơi', 'trong_so_nen' => 1.5, 'he_so_uu_tien' => 1.5],
         ];
         DB::table('trong_so_thuat_toan')->insert($weights);
 
         // 4. Tạo thêm nhiều tài khoản người tìm trọ
         $this->call(NguoiTimTroSeeder::class);
+
+        // 5. Tạo thêm chủ trọ và phòng trọ ở Xuân Mai, Chương Mỹ, Hà Nội
+        $this->call(XuanMaiTroSeeder::class);
     }
 }

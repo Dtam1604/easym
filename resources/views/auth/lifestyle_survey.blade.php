@@ -237,8 +237,6 @@
 @endsection
 
 @push('scripts')
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('surveyForm', () => ({
@@ -258,15 +256,15 @@
                         }
                     @endphp
                     @if($tc->loai_input == 'scale5')
-                        {{ $tc->ten_tieu_chi }}: {{ $giaTriMacDinh }},
+                        {{ $tc->ten_tieu_chi }}: {{ is_numeric($giaTriMacDinh) ? (int)$giaTriMacDinh : 3 }},
                     @elseif($tc->loai_input == 'boolean')
                         {{ $tc->ten_tieu_chi }}: '{{ $giaTriMacDinh }}',
                     @else
                         {{ $tc->ten_tieu_chi }}: '{{ addslashes($giaTriMacDinh) }}',
                     @endif
                 @endforeach
-                ton_giao_loc_cung: {!! isset($loiSongHienTai['ton_giao_loc_cung']) && $loiSongHienTai['ton_giao_loc_cung'] ? 'true' : 'false' !!},
-                van_hoa_loc_cung: {!! isset($loiSongHienTai['van_hoa_loc_cung']) && $loiSongHienTai['van_hoa_loc_cung'] ? 'true' : 'false' !!},
+                ton_giao_loc_cung: {!! (isset($loiSongHienTai['ton_giao_loc_cung']) && $loiSongHienTai['ton_giao_loc_cung'] && $loiSongHienTai['ton_giao_loc_cung'] !== 'false') ? 'true' : 'false' !!},
+                van_hoa_loc_cung: {!! (isset($loiSongHienTai['van_hoa_loc_cung']) && $loiSongHienTai['van_hoa_loc_cung'] && $loiSongHienTai['van_hoa_loc_cung'] !== 'false') ? 'true' : 'false' !!},
                 uu_tien: {!! isset($loiSongHienTai['uu_tien']) ? json_encode($loiSongHienTai['uu_tien']) : '[]' !!}
             },
             

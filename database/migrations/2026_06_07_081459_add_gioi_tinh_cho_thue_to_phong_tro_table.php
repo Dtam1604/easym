@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('phong_tro', 'dien_tich')) {
+        if (!Schema::hasColumn('phong_tro', 'gioi_tinh_cho_thue')) {
             Schema::table('phong_tro', function (Blueprint $table) {
-                $table->float('dien_tich')->nullable()->after('gia_phong')->comment('Diện tích phòng (m2)');
+                $table->string('gioi_tinh_cho_thue', 10)->default('Tat ca')->after('dien_tich');
             });
         } else {
             Schema::table('phong_tro', function (Blueprint $table) {
-                $table->float('dien_tich')->nullable()->change();
+                $table->string('gioi_tinh_cho_thue', 10)->default('Tat ca')->change();
             });
         }
     }
