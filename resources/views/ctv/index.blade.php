@@ -50,7 +50,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">#{{ $phong->id }}</td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-bold text-gray-900 mb-1 line-clamp-1" title="{{ $phong->tieu_de }}">{{ $phong->tieu_de }}</div>
-                                <div class="text-xs text-gray-500 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-gray-400"></i> {{ $phong->dia_chi }}</div>
+                                <div class="text-xs text-gray-500 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-gray-400"></i> {{ $phong->dia_chi_chi_tiet }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">

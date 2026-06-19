@@ -22,12 +22,12 @@
             <!-- Property Info Snapshot -->
             <div class="p-6 bg-gray-50 border-b border-gray-100 flex items-start gap-4">
                 <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-200 flex-shrink-0">
-                    <img src="{{ json_decode($phong->hinh_anh)[0] ?? 'https://placehold.co/400x300?text=No+Image' }}" class="w-full h-full object-cover">
+                    <img src="{{ $phong->anh_phong[0] ?? 'https://placehold.co/400x300?text=No+Image' }}" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 line-clamp-1">{{ $phong->tieu_de }}</h3>
-                    <p class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> {{ $phong->dia_chi }}</p>
-                    <p class="text-sm font-bold text-blue-600 mt-1">{{ number_format($phong->gia_thue, 0, ',', '.') }} VNĐ /tháng</p>
+                    <p class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> {{ $phong->dia_chi_chi_tiet }}</p>
+                    <p class="text-sm font-bold text-blue-600 mt-1">{{ number_format($phong->gia_phong, 0, ',', '.') }} VNĐ /tháng</p>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@
                     
                     <div class="relative border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-2xl p-6 transition-colors duration-200 bg-gray-50/50 flex flex-col items-center justify-center cursor-pointer"
                          @click="$refs.fileInput.click()">
-                        <input type="file" ref="fileInput" name="anh_thuc_dia[]" id="anh_thuc_dia" multiple accept="image/*" class="hidden" @change="previewImages" required>
+                        <input type="file" x-ref="fileInput" name="anh_thuc_dia[]" id="anh_thuc_dia" multiple accept="image/*" class="hidden" @change="previewImages" @click.stop required>
                         
                         <div class="text-center space-y-2">
                             <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto text-blue-500 text-xl shadow-sm">

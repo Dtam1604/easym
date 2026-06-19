@@ -58,6 +58,10 @@ class NguoiDung extends Authenticatable
         'anh_dai_dien',
         'da_xac_thuc_cccd',
         'thong_tin_cccd',
+        'tien_thue',
+        'so_nguoi_to_da',
+        'co_so_vat_chat',
+        'dia_diem_nhiem_ky',
     ];
 
     /**
@@ -82,6 +86,10 @@ class NguoiDung extends Authenticatable
             'thong_tin_cccd' => 'array',
             'da_xac_thuc_cccd' => 'boolean',
             'trang_thai_khoa' => 'boolean',
+            'tien_thue' => 'integer',
+            'so_nguoi_to_da' => 'integer',
+            'co_so_vat_chat' => 'array',
+            'dia_diem_nhiem_ky' => 'array',
         ];
     }
 

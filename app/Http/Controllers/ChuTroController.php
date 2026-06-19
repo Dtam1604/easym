@@ -149,6 +149,10 @@ class ChuTroController extends Controller
         $lng = floatval($request->lng);
         $phong->vi_tri = \Illuminate\Support\Facades\DB::raw("ST_SetSRID(ST_MakePoint($lng, $lat), 4326)");
         
+        // Khi sửa phòng xong thì về trạng thái chưa xác thực (0) và xóa các báo cáo thực địa cũ
+        $phong->muc_do_xac_thuc = 0;
+        $phong->baoCaoXacThuc()->delete();
+        
         $phong->save();
 
         return redirect()->route('chutro.phong')->with('success', 'Đã cập nhật thông tin phòng thành công!');

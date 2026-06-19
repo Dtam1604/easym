@@ -60,10 +60,10 @@
                     <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 z-0 rounded-full"></div>
                     <!-- Active Progress Line -->
                     <div class="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500 ease-out rounded-full"
-                         x-bind:style="'width: ' + ((step - 1) / 1 * 100) + '%'"></div>
+                         x-bind:style="'width: ' + ((step - 1) / 2 * 100) + '%'"></div>
 
                     <!-- Steps Dots -->
-                    <template x-for="i in 2" :key="i">
+                    <template x-for="i in 3" :key="i">
                         <div class="relative z-10 flex flex-col items-center">
                             <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300"
                                  x-bind:class="step >= i ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110' : 'bg-white text-gray-400 border-2 border-gray-200'">
@@ -73,8 +73,9 @@
                     </template>
                 </div>
                 <div class="flex justify-between mt-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    <span :class="step >= 1 ? 'text-blue-600' : ''">Khảo sát</span>
-                    <span :class="step >= 2 ? 'text-blue-600' : ''">Ưu tiên</span>
+                    <span :class="step >= 1 ? 'text-blue-600' : ''">Yêu Cầu Ở Ghép</span>
+                    <span :class="step >= 2 ? 'text-blue-600' : ''">Thói Quen Sinh Hoạt</span>
+                    <span :class="step >= 3 ? 'text-blue-600' : ''">Ưu Tiên Cốt Lõi</span>
                 </div>
             </div>
 
@@ -83,8 +84,63 @@
             <form action="/api/survey/update" method="POST" id="survey-form" class="p-8 md:p-10">
                 @csrf
 
-                <!-- Bước 1: Trả lời câu hỏi (Dynamic) -->
-                <div x-show="step === 1" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                <!-- Bước 1: Yêu cầu ở ghép -->
+                <div x-show="step === 1" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-house-chimney text-blue-500"></i> Thông tin nhu cầu ở ghép
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-800 font-bold mb-2 text-sm">Ngân sách thuê mong muốn (VNĐ/tháng)</label>
+                            <input type="number" name="tien_thue" x-model="formData.tien_thue" min="0" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 py-3 px-4 bg-slate-50 font-medium text-gray-700 shadow-sm" required placeholder="Ví dụ: 2000000">
+                        </div>
+                        <div>
+                            <label class="block text-gray-800 font-bold mb-2 text-sm">Số người ở ghép tối đa mong muốn (người)</label>
+                            <input type="number" name="so_nguoi_to_da" x-model="formData.so_nguoi_to_da" min="1" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 py-3 px-4 bg-slate-50 font-medium text-gray-700 shadow-sm" required placeholder="Ví dụ: 2">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-800 font-bold mb-3 text-sm">Điều kiện cơ sở vật chất / Tiện ích mong muốn</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <template x-for="item in amenitiesList" :key="item.value">
+                                <label class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-slate-50 cursor-pointer transition-all">
+                                    <input type="checkbox" name="co_so_vat_chat[]" :value="item.value" x-model="formData.co_so_vat_chat" class="rounded text-blue-600 focus:ring-blue-500 h-5 w-5 mr-2">
+                                    <span class="text-sm font-semibold text-gray-700" x-text="item.label"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="block text-gray-800 font-bold text-sm">Khu vực muốn ở ghép & Thời hạn ở ghép (Nhiệm kỳ)</label>
+                            <button type="button" @click="addLocationTerm()" class="text-sm font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Thêm địa điểm
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            <template x-for="(locTerm, index) in formData.dia_diem_nhiem_ky" :key="index">
+                                <div class="flex items-center gap-3 p-3 bg-slate-50 border border-gray-200 rounded-xl">
+                                    <div class="flex-1">
+                                        <input type="text" :name="'dia_diem_nhiem_ky['+index+'][dia_diem]'" x-model="locTerm.dia_diem" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3" required placeholder="Khu vực (VD: Hà Nội hoặc Quận 7)">
+                                    </div>
+                                    <div class="w-40 flex items-center gap-2">
+                                        <input type="number" :name="'dia_diem_nhiem_ky['+index+'][nhiem_ky]'" x-model="locTerm.nhiem_ky" min="1" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3" required placeholder="Nhiệm kỳ (tháng)">
+                                        <span class="text-xs font-bold text-gray-500 whitespace-nowrap">tháng</span>
+                                    </div>
+                                    <button type="button" @click="removeLocationTerm(index)" class="text-red-500 hover:text-red-700 p-2" :disabled="formData.dia_diem_nhiem_ky.length <= 1">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bước 2: Trả lời câu hỏi (Dynamic) -->
+                <div x-show="step === 2" style="display: none;" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                         <i class="fa-solid fa-clipboard-question text-blue-500"></i> Các thói quen sinh hoạt
                     </h2>
@@ -175,14 +231,14 @@
                                     @endif
                                 @else
                                     <input type="text" name="{{ $tc->ten_tieu_chi }}" x-model="formData.{{ $tc->ten_tieu_chi }}" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" required placeholder="Nhập câu trả lời...">
-                                @endif
+                                 @endif
                             </div>
                         @endforeach
                     </div>
                 </div>
 
-                <!-- Bước 2: Ưu tiên cốt lõi -->
-                <div x-show="step === 2" style="display: none;" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+                <!-- Bước 3: Ưu tiên cốt lõi -->
+                <div x-show="step === 3" style="display: none;" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
                     <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-3">
                         <i class="fa-solid fa-star text-yellow-400"></i> Tiêu chí Vàng (Top Priorities)
                     </h2>
@@ -215,13 +271,13 @@
                     <div x-show="step === 1"></div>
 
                     <button type="button" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition-all transform focus:ring-4 focus:ring-blue-300"
-                            x-show="step < 2" @click="nextStep()" 
+                            x-show="step < 3" @click="nextStep()" 
                             :class="!isStepValid(step) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 hover:-translate-y-1'">
                         Tiếp tục <i class="fa-solid fa-arrow-right ml-2"></i>
                     </button>
                     
                     <button type="submit" class="px-8 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all transform focus:ring-4 focus:ring-emerald-300"
-                            x-show="step === 2" :class="formData.uu_tien.length === 0 ? 'opacity-90 hover:bg-emerald-600' : 'hover:bg-emerald-600 hover:-translate-y-1'">
+                            x-show="step === 3" :class="formData.uu_tien.length === 0 ? 'opacity-90 hover:bg-emerald-600' : 'hover:bg-emerald-600 hover:-translate-y-1'">
                         <i class="fa-solid fa-check mr-2"></i> 
                         @if(isset($loiSongHienTai) && !empty($loiSongHienTai))
                             Lưu Khảo sát & Tìm bạn
@@ -241,7 +297,21 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('surveyForm', () => ({
             step: 1,
+            amenitiesList: [
+                { value: 'dieu_hoa', label: '❄️ Điều hòa' },
+                { value: 'tu_lanh', label: '🧊 Tủ lạnh' },
+                { value: 'may_giat', label: '🧺 Máy giặt' },
+                { value: 'nong_lanh', label: '🔥 Nóng lạnh' },
+                { value: 'wifi', label: '📶 Wifi' },
+                { value: 'ban_cong', label: '🌅 Ban công' },
+                { value: 've_sinh_khiep_kin', label: '🚽 Khép kín' },
+                { value: 'bep_nau_an', label: '🍳 Bếp riêng' }
+            ],
             formData: {
+                tien_thue: {!! isset($loiSongHienTai['tien_thue']) ? (int)$loiSongHienTai['tien_thue'] : "''" !!},
+                so_nguoi_to_da: {!! isset($loiSongHienTai['so_nguoi_to_da']) ? (int)$loiSongHienTai['so_nguoi_to_da'] : "''" !!},
+                co_so_vat_chat: {!! isset($loiSongHienTai['co_so_vat_chat']) ? json_encode($loiSongHienTai['co_so_vat_chat']) : '[]' !!},
+                dia_diem_nhiem_ky: {!! isset($loiSongHienTai['dia_diem_nhiem_ky']) ? json_encode($loiSongHienTai['dia_diem_nhiem_ky']) : "[{ dia_diem: '', nhiem_ky: 6 }]" !!},
                 @foreach($ds_tieu_chi as $tc)
                     @php 
                         $giaTriMacDinh = '';
@@ -268,6 +338,16 @@
                 uu_tien: {!! isset($loiSongHienTai['uu_tien']) ? json_encode($loiSongHienTai['uu_tien']) : '[]' !!}
             },
             
+            addLocationTerm() {
+                this.formData.dia_diem_nhiem_ky.push({ dia_diem: '', nhiem_ky: 6 });
+            },
+            
+            removeLocationTerm(index) {
+                if (this.formData.dia_diem_nhiem_ky.length > 1) {
+                    this.formData.dia_diem_nhiem_ky.splice(index, 1);
+                }
+            },
+            
             nextStep() {
                 if (this.isStepValid(this.step)) {
                     this.step++;
@@ -284,6 +364,15 @@
             
             isStepValid(currentStep) {
                 if (currentStep === 1) {
+                    if (this.formData.tien_thue === '' || this.formData.so_nguoi_to_da === '') {
+                        return false;
+                    }
+                    if (this.formData.dia_diem_nhiem_ky.some(item => !item.dia_diem || !item.nhiem_ky)) {
+                        return false;
+                    }
+                    return true;
+                }
+                if (currentStep === 2) {
                     // Check if all dynamic fields have value
                     let isValid = true;
                     @foreach($ds_tieu_chi as $tc)

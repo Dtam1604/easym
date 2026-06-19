@@ -222,6 +222,16 @@
                                             <span class="{{ isset($chiTiet['nuoc_sach']) && $chiTiet['nuoc_sach'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['nuoc_sach']) && $chiTiet['nuoc_sach'] ? 'fa-check' : 'fa-xmark' }}"></i> Nước sạch</span>
                                             <span class="{{ isset($chiTiet['an_ninh']) && $chiTiet['an_ninh'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['an_ninh']) && $chiTiet['an_ninh'] ? 'fa-check' : 'fa-xmark' }}"></i> An ninh</span>
                                         </div>
+                                        @if(!empty($chiTiet['ghi_chu']))
+                                            <div class="mt-3 pt-3 border-t border-blue-100">
+                                                <p class="font-bold text-gray-700 mb-1 flex items-center gap-1">
+                                                    <i class="fa-solid fa-note-sticky text-yellow-500"></i> Ghi chú chi tiết của CTV:
+                                                </p>
+                                                <p class="text-gray-600 text-xs bg-white p-2.5 rounded-lg border border-gray-200 leading-relaxed font-medium shadow-sm">
+                                                    {{ $chiTiet['ghi_chu'] }}
+                                                </p>
+                                            </div>
+                                        @endif
                                         @if(isset($chiTiet['hinh_anh']) && is_array($chiTiet['hinh_anh']) && count($chiTiet['hinh_anh']) > 0)
                                             <div class="mt-3 pt-3 border-t border-blue-100">
                                                 <p class="font-bold text-gray-700 mb-1.5 flex items-center gap-1"><i class="fa-solid fa-camera text-sky-500"></i> Ảnh chụp thực địa:</p>

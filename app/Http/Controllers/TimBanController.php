@@ -100,7 +100,12 @@ class TimBanController extends Controller
                     continue; // Bỏ qua nếu họ chưa điền khảo sát
                 }
 
-                $diemSo = $this->tinhDiemMatching($nguoiDungHienTai, $nguoiTiemNang, $danhSachTrongSo);
+                // Lọc cứng: Chỉ gợi ý những người có khả năng kết nối ở ghép (cùng khu vực khả thi)
+                if (!$this->canConnect($idNguoiDung, $nguoiTiemNang->id)) {
+                    continue;
+                }
+
+                $diemSo = $this->tinhDiemMatching($nguoiDungHienTai, $nguoiTiemNang, $danhSachTrongSo, $reqGioiTinh);
 
                 if ($diemSo > 0) {
                     $nguoiTiemNang->matching_score = $diemSo;
@@ -123,6 +128,13 @@ class TimBanController extends Controller
                 ->where('id_nguoi_nhan', $idNguoiDung)
                 ->where('trang_thai', 'cho_duyet')
                 ->get();
+
+            foreach ($loiMoiChoDuyet as $lm) {
+                if ($lm->nguoiGui) {
+                    $diemSo = $this->tinhDiemMatching($nguoiDungHienTai, $lm->nguoiGui, $danhSachTrongSo, $reqGioiTinh);
+                    $lm->nguoiGui->matching_percentage = min(100, round($diemSo));
+                }
+            }
 
             // Phân tích trạng thái kết nối với tất cả các user khác
             $dsLoiMoiLienQuan = \App\Models\LoiMoiOGhep::where('id_nguoi_gui', $idNguoiDung)
@@ -168,7 +180,7 @@ class TimBanController extends Controller
      * Nếu trùng khớp 1 tiêu chí -> Cộng điểm (trong_so_nen)
      * Nếu tiêu chí đó nằm trong list "uu_tien" -> Nhân hệ số 1.5
      */
-    private function tinhDiemMatching(NguoiDung $userA, NguoiDung $userB, $danhSachTrongSo): float
+    private function tinhDiemMatching(NguoiDung $userA, NguoiDung $userB, $danhSachTrongSo, $reqGioiTinh = null): float
     {
         try {
             $loiSongA = $userA->khao_sat_loi_song ?? [];
@@ -180,9 +192,12 @@ class TimBanController extends Controller
 
             // --- CƠ CHẾ RÀNG BUỘC THÍCH ỨNG (ADAPTIVE CONSTRAINTS) - HARD FILTER ---
             // 1. Giới tính: Nếu Giới tính của 2 người khác nhau hoàn toàn (không tính trường hợp Khác/Tất cả), loại bỏ hoàn toàn.
-            if (!empty($userA->gioi_tinh) && !empty($userB->gioi_tinh)) {
-                if ($userA->gioi_tinh !== $userB->gioi_tinh && $userA->gioi_tinh !== 'khac' && $userB->gioi_tinh !== 'khac') {
-                    return 0.0; // Điểm tuyệt đối = 0 (Bị loại)
+            // Chỉ áp dụng lọc cứng nếu người dùng không chọn xem 'Tất cả' hoặc không chọn tìm giới tính khác.
+            if ($reqGioiTinh === null || $reqGioiTinh === $userA->gioi_tinh) {
+                if (!empty($userA->gioi_tinh) && !empty($userB->gioi_tinh)) {
+                    if ($userA->gioi_tinh !== $userB->gioi_tinh && $userA->gioi_tinh !== 'khac' && $userB->gioi_tinh !== 'khac') {
+                        return 0.0; // Điểm tuyệt đối = 0 (Bị loại)
+                    }
                 }
             }
 
@@ -206,42 +221,91 @@ class TimBanController extends Controller
                 return 0.0; // Bị loại
             }
 
+            // 4. Địa điểm ở ghép (Lọc cứng): Hai người phải có ít nhất 1 khu vực chung muốn ở ghép
+            $locTermsA = $userA->dia_diem_nhiem_ky ?? $loiSongA['dia_diem_nhiem_ky'] ?? [['dia_diem' => $userA->thanh_pho ?? 'Hà Nội', 'nhiem_ky' => 12]];
+            $locTermsB = $userB->dia_diem_nhiem_ky ?? $loiSongB['dia_diem_nhiem_ky'] ?? [['dia_diem' => $userB->thanh_pho ?? 'Hà Nội', 'nhiem_ky' => 12]];
+
+            $locationsA = [];
+            foreach ($locTermsA as $item) {
+                if (!empty($item['dia_diem'])) {
+                    $locationsA[mb_strtolower(trim($item['dia_diem']))] = (int)($item['nhiem_ky'] ?? 6);
+                }
+            }
+            $locationsB = [];
+            foreach ($locTermsB as $item) {
+                if (!empty($item['dia_diem'])) {
+                    $locationsB[mb_strtolower(trim($item['dia_diem']))] = (int)($item['nhiem_ky'] ?? 6);
+                }
+            }
+
+            $commonLocations = array_intersect_key($locationsA, $locationsB);
+            if (empty($commonLocations)) {
+                return 0.0; // Bị loại vì không cùng khu vực ở ghép khả thi
+            }
+
+            // Tính điểm độ tương đồng nhiệm kỳ (lease tenure) lớn nhất tại địa điểm chung
+            $maxTermSim = 0.0;
+            foreach ($commonLocations as $loc => $termA) {
+                $termB = $locationsB[$loc];
+                $maxVal = max($termA, $termB);
+                $sim = $maxVal > 0 ? (1 - abs($termA - $termB) / $maxVal) : 1.0;
+                if ($sim > $maxTermSim) {
+                    $maxTermSim = $sim;
+                }
+            }
+
+            // Tính tương đồng Tiền thuê (Price budget similarity)
+            $tienThueA = $userA->tien_thue ?? $loiSongA['tien_thue'] ?? 2000000;
+            $tienThueB = $userB->tien_thue ?? $loiSongB['tien_thue'] ?? 2000000;
+            $maxPrice = max($tienThueA, $tienThueB);
+            $simPrice = $maxPrice > 0 ? (1 - abs($tienThueA - $tienThueB) / $maxPrice) : 1.0;
+            $simPrice = max(0.0, $simPrice);
+
+            // Tính tương đồng Số người ở ghép tối đa (Max roommates similarity)
+            $soNguoiA = $userA->so_nguoi_to_da ?? $loiSongA['so_nguoi_to_da'] ?? 2;
+            $soNguoiB = $userB->so_nguoi_to_da ?? $loiSongB['so_nguoi_to_da'] ?? 2;
+            $maxPeople = max($soNguoiA, $soNguoiB);
+            $simPeople = $maxPeople > 0 ? (1 - abs($soNguoiA - $soNguoiB) / $maxPeople) : 1.0;
+            $simPeople = max(0.0, $simPeople);
+
+            // Tính tương đồng Cơ sở vật chất (Facilities similarity - Jaccard index)
+            $csvcA = $userA->co_so_vat_chat ?? $loiSongA['co_so_vat_chat'] ?? [];
+            $csvcB = $userB->co_so_vat_chat ?? $loiSongB['co_so_vat_chat'] ?? [];
+            if (empty($csvcA) && empty($csvcB)) {
+                $simFacilities = 1.0;
+            } else {
+                $intersect = count(array_intersect($csvcA, $csvcB));
+                $union = count(array_unique(array_merge($csvcA, $csvcB)));
+                $simFacilities = $union > 0 ? ($intersect / $union) : 1.0;
+            }
+
+            // 5. Tính điểm độ phù hợp lối sống (Original Lifestyle Score)
             $uuTienA = $loiSongA['uu_tien'] ?? [];
             $diemTongDatDuoc = 0.0;
-            $tongDiemToiDaKhaThi = 0.0; // Biến lưu tổng điểm tối đa có thể đạt được
+            $tongDiemToiDaKhaThi = 0.0;
 
             foreach ($danhSachTrongSo as $tieuChi) {
                 $maTieuChi = $tieuChi->ten_tieu_chi;
 
-                // Bỏ qua nếu tiêu chí là uu_tien (vì đây là một mảng cấu hình, không phải tiêu chí so sánh)
-                if ($maTieuChi === 'uu_tien') {
+                if (in_array($maTieuChi, ['uu_tien', 'tien_thue', 'so_nguoi_to_da', 'co_so_vat_chat', 'dia_diem_nhiem_ky'])) {
                     continue;
                 }
 
-                // Chỉ xét các tiêu chí mà User A có đánh giá trong bài khảo sát
                 if (isset($loiSongA[$maTieuChi])) {
-                    
-                    // 1. CHUẨN HÓA CÔNG THỨC: Tính tổng điểm tối đa khả thi
-                    // Nếu tiêu chí này nằm trong danh sách ưu tiên của User A, điểm tối đa phải nhân thêm hệ số ưu tiên
                     $diemToiDaTieuChi = $tieuChi->trong_so_nen;
                     if (in_array($maTieuChi, $uuTienA)) {
                         $diemToiDaTieuChi = $tieuChi->trong_so_nen * $tieuChi->he_so_uu_tien;
                     }
                     
-                    // Cộng dồn vào mẫu số
                     $tongDiemToiDaKhaThi += $diemToiDaTieuChi;
 
                     if (isset($loiSongB[$maTieuChi])) {
-                        // 2. ÉP KIỂU DỮ LIỆU (Loose/Casted Comparison)
-                        // Ép kiểu tất cả về String để so sánh chuẩn xác, tránh lỗi "1" !== 1 trong JSON
                         $giaTriA = (string) $loiSongA[$maTieuChi];
                         $giaTriB = (string) $loiSongB[$maTieuChi];
 
                         if ($giaTriA === $giaTriB) {
-                            // Trùng khớp hoàn toàn -> Đạt điểm tối đa của tiêu chí
                             $diemTongDatDuoc += $diemToiDaTieuChi;
                         } elseif ($tieuChi->loai_input == 'scale5') {
-                            // Xử lý nới lỏng cho thang điểm 1-5 (Chênh lệch 1 bậc vẫn được tính 50% số điểm)
                             $doLech = abs((float)$giaTriA - (float)$giaTriB);
                             if ($doLech == 1) {
                                 $diemTongDatDuoc += ($diemToiDaTieuChi * 0.5);
@@ -251,15 +315,17 @@ class TimBanController extends Controller
                 }
             }
 
-            // 3. TÍNH PHẦN TRĂM KHỚP (Formula Normalization)
-            if ($tongDiemToiDaKhaThi == 0) {
-                return 10.0; // Điểm tối thiểu nếu bài khảo sát lỗi/rỗng
-            }
+            $phanTramKhopLifestyle = $tongDiemToiDaKhaThi > 0 ? ($diemTongDatDuoc / $tongDiemToiDaKhaThi) * 100 : 10.0;
 
-            // Công thức: (Tổng điểm đạt được / Tổng điểm tối đa) * 100
-            $phanTramKhop = ($diemTongDatDuoc / $tongDiemToiDaKhaThi) * 100;
-            
-            return round($phanTramKhop, 2);
+            // 6. Tổng hợp điểm matching tích hợp mới (Integrated Matching Score)
+            // Trọng số: Lối sống 40%, Vị trí & Nhiệm kỳ 20%, Giá phòng 20%, Số người tối đa 10%, Tiện nghi 10%
+            $finalScore = 0.40 * $phanTramKhopLifestyle 
+                        + 0.20 * ($maxTermSim * 100) 
+                        + 0.20 * ($simPrice * 100) 
+                        + 0.10 * ($simPeople * 100) 
+                        + 0.10 * ($simFacilities * 100);
+
+            return round($finalScore, 2);
 
         } catch (Exception $e) {
             Log::error('Lỗi khi tính điểm ghép bạn: ' . $e->getMessage());
@@ -280,8 +346,16 @@ class TimBanController extends Controller
                 return response()->json(['success' => false, 'message' => 'Không thể kết nối với chính mình.']);
             }
 
+            // Kiểm tra ràng buộc địa điểm ở ghép
+            if (!$this->canConnect($idNguoiGui, $id)) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Không thể kết nối: Hai bạn không cùng khu vực ở ghép khả thi, hoặc đã ở ghép với người khác tại địa điểm khác.'
+                ]);
+            }
+
             // Kiểm tra xem người kia đã gửi cho mình chưa (Tránh spam 2 chiều)
-            $loiMoiNguocLai = \App\Models\LoiMoiOGhep::where('id_nguoi_gui', $id)
+            $loiMoiNguocLai = \App\Models\LoiMoiOGhep::where('id', $id)
                                                     ->where('id_nguoi_nhan', $idNguoiGui)
                                                     ->where('trang_thai', 'cho_duyet')
                                                     ->first();
@@ -340,6 +414,14 @@ class TimBanController extends Controller
                         ->first();
             
             if ($loiMoi) {
+                // Kiểm tra ràng buộc địa điểm ở ghép trước khi chấp nhận
+                if (!$this->canConnect($loiMoi->id_nguoi_gui, $loiMoi->id_nguoi_nhan)) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Không thể chấp nhận: Hai bạn không cùng khu vực ở ghép khả thi, hoặc đã ở ghép với người khác tại địa điểm khác.'
+                    ]);
+                }
+
                 $loiMoi->update(['trang_thai' => 'chap_nhan']);
                 
                 // Gửi thông báo cho người gửi
@@ -419,5 +501,128 @@ class TimBanController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Lỗi máy chủ.'], 500);
         }
+    }
+
+    /**
+     * Lấy danh sách ID các thành viên trong nhóm ở ghép của người dùng (dùng thuật toán duyệt đồ thị BFS).
+     */
+    private function getRoommateGroupMembers($userId)
+    {
+        $group = [$userId];
+        $queue = [$userId];
+        
+        while (!empty($queue)) {
+            $currentId = array_shift($queue);
+            
+            $connections = \App\Models\LoiMoiOGhep::where('trang_thai', 'chap_nhan')
+                ->where(function($q) use ($currentId) {
+                    $q->where('id_nguoi_gui', $currentId)
+                      ->orWhere('id_nguoi_nhan', $currentId);
+                })
+                ->get()
+                ->map(function($lm) use ($currentId) {
+                    return $lm->id_nguoi_gui == $currentId ? $lm->id_nguoi_nhan : $lm->id_nguoi_gui;
+                })
+                ->toArray();
+                
+            foreach ($connections as $connId) {
+                if (!in_array($connId, $group)) {
+                    $group[] = $connId;
+                    $queue[] = $connId;
+                }
+            }
+        }
+        
+        return $group;
+    }
+
+    /**
+     * Lấy các địa điểm ở ghép hiện tại/khả thi chung của nhóm bạn ở ghép.
+     */
+    private function getUserActiveLocations($userId)
+    {
+        $groupMembers = $this->getRoommateGroupMembers($userId);
+        $commonIntersection = null;
+        
+        foreach ($groupMembers as $memberId) {
+            $user = \App\Models\NguoiDung::find($memberId);
+            if (!$user) {
+                continue;
+            }
+            
+            $userLocs = collect($user->dia_diem_nhiem_ky ?? $user->khao_sat_loi_song['dia_diem_nhiem_ky'] ?? [])
+                ->pluck('dia_diem')
+                ->map(fn($l) => trim(mb_strtolower($l)))
+                ->filter()
+                ->toArray();
+                
+            if (empty($userLocs) && !empty($user->thanh_pho)) {
+                $userLocs = [trim(mb_strtolower($user->thanh_pho))];
+            }
+            
+            if ($commonIntersection === null) {
+                $commonIntersection = $userLocs;
+            } else {
+                $commonIntersection = array_intersect($commonIntersection, $userLocs);
+            }
+        }
+        
+        return $commonIntersection ? array_values($commonIntersection) : [];
+    }
+
+    /**
+     * Lấy sức chứa tối đa của nhóm ở ghép (là giá trị nhỏ nhất trong số các so_nguoi_to_da của từng thành viên).
+     */
+    private function getRoommateGroupCapacity($memberIds)
+    {
+        $minCapacity = 999;
+        foreach ($memberIds as $id) {
+            $user = \App\Models\NguoiDung::find($id);
+            if ($user) {
+                $cap = $user->so_nguoi_to_da ?? ($user->khao_sat_loi_song['so_nguoi_to_da'] ?? 2);
+                if ($cap < $minCapacity) {
+                    $minCapacity = $cap;
+                }
+            }
+        }
+        return $minCapacity;
+    }
+
+    /**
+     * Kiểm tra xem 2 người dùng có thể kết nối ở ghép với nhau hay không.
+     */
+    private function canConnect($userAId, $userBId)
+    {
+        // Lấy danh sách thành viên của 2 nhóm hiện tại
+        $groupA = $this->getRoommateGroupMembers($userAId);
+        $groupB = $this->getRoommateGroupMembers($userBId);
+
+        // Nếu đã cùng nhóm, không cần kết nối nữa
+        if (in_array($userBId, $groupA)) {
+            return false;
+        }
+
+        // Tính toán nhóm sau khi sát nhập
+        $mergedGroup = array_unique(array_merge($groupA, $groupB));
+        $mergedSize = count($mergedGroup);
+
+        // Tính giới hạn tối đa của nhóm sau khi sát nhập
+        $mergedCapacity = $this->getRoommateGroupCapacity($mergedGroup);
+
+        // Nếu số người sau khi sát nhập vượt quá giới hạn tối đa của bất kỳ thành viên nào, không cho phép ghép
+        if ($mergedSize > $mergedCapacity) {
+            return false;
+        }
+
+        // Kiểm tra tính tương thích về khu vực ở ghép
+        $locsA = $this->getUserActiveLocations($userAId);
+        $locsB = $this->getUserActiveLocations($userBId);
+
+        if (empty($locsA) || empty($locsB)) {
+            return false;
+        }
+
+        $intersection = array_intersect($locsA, $locsB);
+        return !empty($intersection);
     }
 }

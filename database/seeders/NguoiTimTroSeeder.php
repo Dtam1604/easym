@@ -14,6 +14,9 @@ class NguoiTimTroSeeder extends Seeder
      */
     public function run(): void
     {
+        // Xóa sạch các tài khoản người tìm trọ mẫu cũ để tránh trùng lặp email khi seed lại
+        NguoiDung::where('email', 'like', 'nguoitimtro_%')->delete();
+
         // Danh sách ảnh đại diện Unsplash chất lượng cao cho Nam và Nữ
         $maleAvatars = [
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
@@ -131,6 +134,24 @@ class NguoiTimTroSeeder extends Seeder
             }
             $khaoSat['uu_tien'] = $uuTien;
 
+            // Bổ sung các trường tìm người ở ghép mới
+            $khaoSat['tien_thue'] = rand(15, 40) * 100000;
+            $khaoSat['so_nguoi_to_da'] = rand(2, 4);
+            $allCsvc = ['dieu_hoa', 'tu_lanh', 'may_giat', 'wifi', 'ban_cong', 've_sinh_khiep_kin'];
+            shuffle($allCsvc);
+            $khaoSat['co_so_vat_chat'] = array_slice($allCsvc, 0, rand(2, 4));
+            $thanhPho = ($i < 10) ? 'Hà Nội' : $cities[array_rand($cities)];
+            $khaoSat['dia_diem_nhiem_ky'] = [
+                ['dia_diem' => $thanhPho, 'nhiem_ky' => rand(1, 2) * 6]
+            ];
+            if (rand(1, 10) > 5) {
+                $phuCities = array_values(array_diff($cities, [$thanhPho]));
+                $khaoSat['dia_diem_nhiem_ky'][] = [
+                    'dia_diem' => $phuCities[array_rand($phuCities)],
+                    'nhiem_ky' => rand(1, 2) * 6
+                ];
+            }
+
             NguoiDung::create([
                 'ho_ten' => $namData['ho_ten'],
                 'email' => $email,
@@ -140,7 +161,7 @@ class NguoiTimTroSeeder extends Seeder
                 'vai_tro' => 'nguoi_tim_tro',
                 'gioi_tinh' => 'nam',
                 'nam_sinh' => rand(1996, 2007),
-                'nghe_nghiep' => $namData['nghe_nghiep'],
+                'nghe_nghiep' => null,
                 'anh_dai_dien' => $maleAvatars[$i % count($maleAvatars)],
                 'da_xac_thuc_cccd' => (rand(1, 10) > 4), // 60% đã KYC
                 'thong_tin_cccd' => [
@@ -149,6 +170,10 @@ class NguoiTimTroSeeder extends Seeder
                     'noi_cap' => 'Cục Cảnh sát QLHC về TTXH'
                 ],
                 'khao_sat_loi_song' => $khaoSat,
+                'tien_thue' => $khaoSat['tien_thue'],
+                'so_nguoi_to_da' => $khaoSat['so_nguoi_to_da'],
+                'co_so_vat_chat' => $khaoSat['co_so_vat_chat'],
+                'dia_diem_nhiem_ky' => $khaoSat['dia_diem_nhiem_ky'],
                 'created_at' => Carbon::now()->subDays(rand(1, 30)),
                 'updated_at' => Carbon::now(),
             ]);
@@ -190,6 +215,24 @@ class NguoiTimTroSeeder extends Seeder
             }
             $khaoSat['uu_tien'] = $uuTien;
 
+            // Bổ sung các trường tìm người ở ghép mới
+            $khaoSat['tien_thue'] = rand(15, 40) * 100000;
+            $khaoSat['so_nguoi_to_da'] = rand(2, 4);
+            $allCsvc = ['dieu_hoa', 'tu_lanh', 'may_giat', 'wifi', 'ban_cong', 've_sinh_khiep_kin'];
+            shuffle($allCsvc);
+            $khaoSat['co_so_vat_chat'] = array_slice($allCsvc, 0, rand(2, 4));
+            $thanhPho = ($i < 10) ? 'Hà Nội' : $cities[array_rand($cities)];
+            $khaoSat['dia_diem_nhiem_ky'] = [
+                ['dia_diem' => $thanhPho, 'nhiem_ky' => rand(1, 2) * 6]
+            ];
+            if (rand(1, 10) > 5) {
+                $phuCities = array_values(array_diff($cities, [$thanhPho]));
+                $khaoSat['dia_diem_nhiem_ky'][] = [
+                    'dia_diem' => $phuCities[array_rand($phuCities)],
+                    'nhiem_ky' => rand(1, 2) * 6
+                ];
+            }
+
             NguoiDung::create([
                 'ho_ten' => $nuData['ho_ten'],
                 'email' => $email,
@@ -199,7 +242,7 @@ class NguoiTimTroSeeder extends Seeder
                 'vai_tro' => 'nguoi_tim_tro',
                 'gioi_tinh' => 'nu',
                 'nam_sinh' => rand(1996, 2007),
-                'nghe_nghiep' => $nuData['nghe_nghiep'],
+                'nghe_nghiep' => null,
                 'anh_dai_dien' => $femaleAvatars[$i % count($femaleAvatars)],
                 'da_xac_thuc_cccd' => (rand(1, 10) > 4), // 60% đã KYC
                 'thong_tin_cccd' => [
@@ -208,6 +251,10 @@ class NguoiTimTroSeeder extends Seeder
                     'noi_cap' => 'Cục Cảnh sát QLHC về TTXH'
                 ],
                 'khao_sat_loi_song' => $khaoSat,
+                'tien_thue' => $khaoSat['tien_thue'],
+                'so_nguoi_to_da' => $khaoSat['so_nguoi_to_da'],
+                'co_so_vat_chat' => $khaoSat['co_so_vat_chat'],
+                'dia_diem_nhiem_ky' => $khaoSat['dia_diem_nhiem_ky'],
                 'created_at' => Carbon::now()->subDays(rand(1, 30)),
                 'updated_at' => Carbon::now(),
             ]);

@@ -28,6 +28,13 @@ class NguoiDungController extends Controller
             'uu_tien.*' => 'string',
             'ton_giao_loc_cung' => 'nullable',
             'van_hoa_loc_cung' => 'nullable',
+            'tien_thue' => 'required|numeric|min:0',
+            'so_nguoi_to_da' => 'required|integer|min:1',
+            'co_so_vat_chat' => 'nullable|array',
+            'co_so_vat_chat.*' => 'string',
+            'dia_diem_nhiem_ky' => 'required|array|min:1',
+            'dia_diem_nhiem_ky.*.dia_diem' => 'required|string',
+            'dia_diem_nhiem_ky.*.nhiem_ky' => 'required|integer|min:1',
         ];
 
         foreach($ds_tieu_chi as $tc) {
@@ -44,6 +51,13 @@ class NguoiDungController extends Controller
             // Vi da khai bao Cast 'array' trong Model NguoiDung,
             // Laravel tu dong ma hoa mang $validatedData thanh JSONB truoc khi luu vao CSDL.
             $user->khao_sat_loi_song = $validatedData;
+            
+            // Lưu trực tiếp vào các cột SQL
+            $user->tien_thue = $validatedData['tien_thue'];
+            $user->so_nguoi_to_da = $validatedData['so_nguoi_to_da'];
+            $user->co_so_vat_chat = $validatedData['co_so_vat_chat'] ?? [];
+            $user->dia_diem_nhiem_ky = $validatedData['dia_diem_nhiem_ky'] ?? [];
+            
             $user->save();
             
             // 3. Chuyen huong ve trang ket qua ban do goi y
