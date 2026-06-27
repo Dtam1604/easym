@@ -3,12 +3,13 @@
 @section('title', 'Tất cả thông báo - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
+<div class="ops-page py-8 sm:py-10">
+    <div class="ops-shell max-w-4xl space-y-6">
         <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="ops-card p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                <p class="ops-kicker">Hộp thư</p>
+                <h1 class="ops-title text-2xl sm:text-3xl mt-1 flex items-center gap-3">
                     <i class="fa-solid fa-bell text-blue-600"></i> Thông báo của bạn
                 </h1>
                 <p class="text-gray-500 mt-2">Theo dõi mọi cập nhật và thông tin quan trọng từ hệ thống.</p>
@@ -16,7 +17,7 @@
             @if(auth()->user()->unreadNotifications->count() > 0)
                 <form action="{{ route('thong_bao.doc_tat_ca') }}" method="POST">
                     @csrf
-                    <button type="submit" class="bg-white border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-300 font-bold py-2 px-4 rounded-xl transition-colors shadow-sm flex items-center gap-2">
+                    <button type="submit" class="ops-action-secondary">
                         <i class="fa-solid fa-check-double"></i> Đánh dấu tất cả đã đọc
                     </button>
                 </form>
@@ -24,14 +25,14 @@
         </div>
 
         @if(session('success'))
-            <div class="bg-emerald-50 text-emerald-700 p-4 rounded-xl mb-6 border border-emerald-100 flex items-center gap-3">
+            <div class="ops-card bg-emerald-50 text-emerald-700 p-4 border-emerald-100 flex items-center gap-3">
                 <i class="fa-solid fa-circle-check text-xl"></i>
                 <span class="font-medium">{{ session('success') }}</span>
             </div>
         @endif
 
         <!-- Notifications List -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="ops-card overflow-hidden">
             @if($thongBaos->count() > 0)
                 <ul class="divide-y divide-gray-100">
                     @foreach($thongBaos as $notification)

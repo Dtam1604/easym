@@ -3,128 +3,137 @@
 @section('title', 'Quản lý Tiêu chí Gợi ý - Admin')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="mb-8 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Quản lý Tiêu chí Lối sống (Dynamic Criteria)</h1>
-                <p class="mt-1 text-sm text-gray-500">Thêm mới và cấu hình trọng số cho các tiêu chí ghép đôi phòng trọ.</p>
-            </div>
-            <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Quay lại Dashboard
-            </a>
-        </div>
+<div class="flex min-h-[calc(100dvh-72px)] ops-page font-sans">
+    @include('admin.partials.sidebar', ['active' => 'tieuchi'])
 
-        @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-r-lg">
-            <p class="font-medium">{{ session('success') }}</p>
-        </div>
-        @endif
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="p-6 border-b border-gray-200 bg-gray-50/50">
-                <h3 class="text-lg font-bold text-gray-900">Thêm tiêu chí mới</h3>
-            </div>
-            
-            <form action="{{ route('admin.tieuchi.store') }}" method="POST" class="p-6">
-                @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tên tiêu chí -->
-                    <div>
-                        <label for="ten_tieu_chi" class="block text-sm font-medium text-gray-700 mb-1">Tên tiêu chí (không dấu, cách nhau bởi `_`)</label>
-                        <input type="text" name="ten_tieu_chi" id="ten_tieu_chi" required placeholder="vd: nuoi_thu_cung" 
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">Dùng làm key trong JSON (ví dụ: thoi_gian_ve_dem).</p>
-                    </div>
-
-                    <!-- Tiêu đề hiển thị -->
-                    <div>
-                        <label for="tieu_de_hien_thi" class="block text-sm font-medium text-gray-700 mb-1">Tiêu đề hiển thị (Dành cho người dùng)</label>
-                        <input type="text" name="tieu_de_hien_thi" id="tieu_de_hien_thi" required placeholder="vd: Bạn có nuôi thú cưng không?" 
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">Sẽ hiển thị thành câu hỏi ở trang Khảo sát lối sống.</p>
-                    </div>
-                    
-                    <!-- Loại Input -->
-                    <div>
-                        <label for="loai_input" class="block text-sm font-medium text-gray-700 mb-1">Loại câu trả lời (Dạng nhập liệu)</label>
-                        <select name="loai_input" id="loai_input" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="boolean">Đúng / Sai (Có / Không)</option>
-                            <option value="scale5">Thang điểm 1-5 (Mức độ)</option>
-                        </select>
-                        <p class="text-xs text-gray-500 mt-1">Định hình giao diện UI trên trang Khảo sát.</p>
-                    </div>
-
-                    <!-- Trọng số và Hệ số ưu tiên -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="trong_so_nen" class="block text-sm font-medium text-gray-700 mb-1">Trọng số nền</label>
-                            <input type="number" step="0.1" name="trong_so_nen" id="trong_so_nen" value="1.0" required 
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label for="he_so_uu_tien" class="block text-sm font-medium text-gray-700 mb-1">Hệ số ưu tiên</label>
-                            <input type="number" step="0.1" name="he_so_uu_tien" id="he_so_uu_tien" value="1.5" required 
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
+    <main class="flex-1 flex flex-col ops-main">
+        <header class="ops-header flex items-center justify-between px-6 lg:px-8 z-10 sticky top-0">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('admin.dashboard') }}" class="ops-action-secondary min-h-0 w-10 h-10 p-0" aria-label="Quay lại dashboard">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <p class="ops-kicker">Cấu hình khảo sát</p>
+                    <h1 class="text-xl font-black text-gray-900">Tiêu chí lối sống</h1>
                 </div>
+            </div>
+            <span class="ops-badge ops-badge-blue">{{ count($ds_tieu_chi) }} tiêu chí</span>
+        </header>
 
-                <div class="mt-8 flex justify-end">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition-colors flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        Thêm mới tiêu chí
-                    </button>
+        <div class="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+            @if(session('success'))
+                <div class="ops-card bg-emerald-50 border-emerald-200 p-4 text-emerald-800 flex items-center gap-3">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span class="font-bold">{{ session('success') }}</span>
                 </div>
-            </form>
-        </div>
+            @endif
 
-        <!-- Danh sách tiêu chí hiện tại -->
-        <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="p-6 border-b border-gray-200 bg-gray-50/50">
-                <h3 class="text-lg font-bold text-gray-900">Các tiêu chí đang hoạt động</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tên tiêu chí (Key)</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Câu hỏi hiển thị</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Loại Input</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Trọng số nền</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Hệ số ưu tiên</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($ds_tieu_chi as $tc)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $tc->ten_tieu_chi }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $tc->tieu_de_hien_thi ?? 'Chưa cài đặt' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $tc->loai_input == 'boolean' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                    {{ $tc->loai_input ?? 'scale5' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">{{ $tc->trong_so_nen }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold text-blue-600">{{ $tc->he_so_uu_tien }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
-                                <a href="{{ route('admin.tieuchi.edit', $tc->id) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md transition-colors">Sửa</a>
-                                <form action="{{ route('admin.tieuchi.destroy', $tc->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiêu chí này? Việc này có thể ảnh hưởng đến khảo sát của User.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-md transition-colors">Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] gap-6 items-start">
+                <section class="ops-card overflow-hidden">
+                    <div class="ops-card-header p-5">
+                        <p class="ops-kicker">Thêm mới</p>
+                        <h2 class="text-lg font-black text-gray-900 mt-1">Tạo tiêu chí khảo sát</h2>
+                        <p class="ops-muted text-sm mt-1">Các key này được dùng trong dữ liệu JSON của khảo sát lối sống.</p>
+                    </div>
+
+                    <form action="{{ route('admin.tieuchi.store') }}" method="POST" class="p-5 space-y-5">
+                        @csrf
+                        <div>
+                            <label for="ten_tieu_chi" class="block text-sm font-bold text-gray-700 mb-1">Tên tiêu chí (key)</label>
+                            <input type="text" name="ten_tieu_chi" id="ten_tieu_chi" required placeholder="vd: nuoi_thu_cung" class="w-full">
+                            <p class="text-xs text-gray-500 mt-1">Không dấu, cách nhau bởi dấu gạch dưới.</p>
+                        </div>
+
+                        <div>
+                            <label for="tieu_de_hien_thi" class="block text-sm font-bold text-gray-700 mb-1">Câu hỏi hiển thị</label>
+                            <input type="text" name="tieu_de_hien_thi" id="tieu_de_hien_thi" required placeholder="vd: Bạn có nuôi thú cưng không?" class="w-full">
+                        </div>
+
+                        <div>
+                            <label for="loai_input" class="block text-sm font-bold text-gray-700 mb-1">Loại câu trả lời</label>
+                            <select name="loai_input" id="loai_input" class="w-full">
+                                <option value="boolean">Đúng / Sai (Có / Không)</option>
+                                <option value="scale5">Thang điểm 1-5 (Mức độ)</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="trong_so_nen" class="block text-sm font-bold text-gray-700 mb-1">Trọng số nền</label>
+                                <input type="number" step="0.1" name="trong_so_nen" id="trong_so_nen" value="1.0" required class="w-full">
+                            </div>
+                            <div>
+                                <label for="he_so_uu_tien" class="block text-sm font-bold text-gray-700 mb-1">Hệ số ưu tiên</label>
+                                <input type="number" step="0.1" name="he_so_uu_tien" id="he_so_uu_tien" value="1.5" required class="w-full">
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex justify-end">
+                            <button type="submit" class="ops-action-primary">
+                                <i class="fa-solid fa-plus"></i>
+                                Thêm tiêu chí
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="ops-card overflow-hidden">
+                    <div class="ops-card-header p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <p class="ops-kicker">Đang hoạt động</p>
+                            <h2 class="text-lg font-black text-gray-900 mt-1">Danh sách tiêu chí</h2>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="ops-table min-w-full">
+                            <thead>
+                                <tr>
+                                    <th class="px-5 py-3 text-left">Key</th>
+                                    <th class="px-5 py-3 text-left">Câu hỏi</th>
+                                    <th class="px-5 py-3 text-left">Loại</th>
+                                    <th class="px-5 py-3 text-left">Base</th>
+                                    <th class="px-5 py-3 text-left">Boost</th>
+                                    <th class="px-5 py-3 text-right">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @forelse($ds_tieu_chi as $tc)
+                                    <tr>
+                                        <td class="px-5 py-4 whitespace-nowrap text-sm font-black text-gray-900">{{ $tc->ten_tieu_chi }}</td>
+                                        <td class="px-5 py-4 text-sm text-gray-600 min-w-64">{{ $tc->tieu_de_hien_thi ?? 'Chưa cài đặt' }}</td>
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <span class="ops-badge {{ $tc->loai_input == 'boolean' ? 'ops-badge-green' : 'ops-badge-blue' }} py-1">{{ $tc->loai_input ?? 'scale5' }}</span>
+                                        </td>
+                                        <td class="px-5 py-4 whitespace-nowrap text-sm font-black text-gray-900">{{ $tc->trong_so_nen }}</td>
+                                        <td class="px-5 py-4 whitespace-nowrap text-sm font-black text-blue-600">{{ $tc->he_so_uu_tien }}</td>
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <div class="flex justify-end gap-2">
+                                                <a href="{{ route('admin.tieuchi.edit', $tc->id) }}" class="ops-action-secondary min-h-0 py-1.5 text-xs">Sửa</a>
+                                                <form action="{{ route('admin.tieuchi.destroy', $tc->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiêu chí này? Việc này có thể ảnh hưởng đến khảo sát của User.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="ops-action-danger min-h-0 py-1.5 text-xs">Xóa</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-5 py-12 text-center text-gray-500">
+                                            <div class="w-14 h-14 rounded-full bg-gray-100 mx-auto mb-3 grid place-items-center">
+                                                <i class="fa-solid fa-layer-group text-gray-400"></i>
+                                            </div>
+                                            <p class="font-bold">Chưa có tiêu chí nào.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </div>
-
-    </div>
+    </main>
 </div>
 @endsection

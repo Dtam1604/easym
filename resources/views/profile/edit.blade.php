@@ -3,24 +3,25 @@
 @section('title', 'Cấu hình Thông tin Bản thân - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 py-10">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="ops-page py-8 sm:py-10">
+    <div class="ops-shell max-w-4xl space-y-6">
         
         <!-- Header -->
-        <div class="mb-8 flex items-center justify-between">
+        <div class="ops-card p-5 sm:p-6 flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-black text-gray-900 tracking-tight">Thông tin Cá nhân</h1>
+                <p class="ops-kicker">Tài khoản</p>
+                <h1 class="ops-title text-2xl sm:text-3xl mt-1">Thông tin cá nhân</h1>
                 <p class="text-gray-500 mt-2">Cập nhật hồ sơ để hệ thống ghép phòng (Matching) hoạt động chính xác hơn.</p>
             </div>
         </div>
 
         @if(session('success'))
-        <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 font-medium rounded-r-lg flex items-center">
+        <div class="ops-card p-4 bg-emerald-50 border-emerald-200 text-emerald-700 font-medium flex items-center">
             <i class="fa-solid fa-circle-check mr-2"></i> {{ session('success') }}
         </div>
         @endif
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="ops-card overflow-hidden">
             <form action="{{ route('profile.update') }}" method="POST" class="p-8">
                 @csrf
                 @method('PUT')
@@ -42,14 +43,14 @@
                                 onchange="document.getElementById('avatarPreview').src = this.value || 'https://ui-avatars.com/api/?name={{ urlencode($user->ho_ten) }}'">
                         </div>
 
-                        <div class="w-full mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200 text-center">
+                        <div class="w-full mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center">
                             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Trạng thái Xác thực</h4>
                             @if($user->da_xac_thuc_cccd)
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                <span class="ops-badge ops-badge-green">
                                     <i class="fa-solid fa-shield-check mr-1"></i> Đã xác minh CCCD
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                <span class="ops-badge ops-badge-amber">
                                     <i class="fa-solid fa-shield-halved mr-1"></i> Chưa xác minh
                                 </span>
                             @endif
@@ -117,7 +118,7 @@
                         </div>
 
                         <div class="pt-6 flex justify-end">
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-200 transition-transform transform hover:-translate-y-1">
+                            <button type="submit" class="ops-action-primary min-h-[2.75rem] px-8">
                                 <i class="fa-solid fa-floppy-disk mr-2"></i> Lưu thay đổi
                             </button>
                         </div>

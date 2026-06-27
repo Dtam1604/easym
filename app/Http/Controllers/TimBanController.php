@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\NguoiDung;
+use App\Models\LoiMoiOGhep;
 use App\Models\TrongSoThuatToan;
+use App\Notifications\LoiMoiOGhepNotification;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -124,7 +126,7 @@ class TimBanController extends Controller
             });
 
             // Lấy danh sách lời mời đang chờ duyệt mà người này nhận được (dùng cho Panel)
-            $loiMoiChoDuyet = \App\Models\LoiMoiOGhep::with('nguoiGui')
+            $loiMoiChoDuyet = LoiMoiOGhep::with('nguoiGui')
                 ->where('id_nguoi_nhan', $idNguoiDung)
                 ->where('trang_thai', 'cho_duyet')
                 ->get();
@@ -133,11 +135,12 @@ class TimBanController extends Controller
                 if ($lm->nguoiGui) {
                     $diemSo = $this->tinhDiemMatching($nguoiDungHienTai, $lm->nguoiGui, $danhSachTrongSo, $reqGioiTinh);
                     $lm->nguoiGui->matching_percentage = min(100, round($diemSo));
+                    $lm->nguoiGui->roommate_data = $this->roommateData($lm->nguoiGui, 'received');
                 }
             }
 
             // Phân tích trạng thái kết nối với tất cả các user khác
-            $dsLoiMoiLienQuan = \App\Models\LoiMoiOGhep::where('id_nguoi_gui', $idNguoiDung)
+            $dsLoiMoiLienQuan = LoiMoiOGhep::where('id_nguoi_gui', $idNguoiDung)
                                                        ->orWhere('id_nguoi_nhan', $idNguoiDung)
                                                        ->get();
 
@@ -159,6 +162,10 @@ class TimBanController extends Controller
                 }
             }
 
+            foreach ($ketQuaGoiY as $nguoi) {
+                $nguoi->roommate_data = $this->roommateData($nguoi, $trangThaiKetNoi[$nguoi->id] ?? null);
+            }
+
             return view('pro_search.roommates', [
                 'nguoiDungHienTai' => $nguoiDungHienTai,
                 'ds_goi_y' => $ketQuaGoiY,
@@ -170,6 +177,27 @@ class TimBanController extends Controller
             Log::error('Lỗi tại TimBanController@danhSachGoiYBan: ' . $e->getMessage());
             return response()->view('errors.500', [], 500);
         }
+    }
+
+    private function roommateData(NguoiDung $nguoi, ?string $trangThai = null): array
+    {
+        return [
+            'id' => $nguoi->id,
+            'ho_ten' => $nguoi->ho_ten,
+            'nam_sinh' => $nguoi->nam_sinh,
+            'nghe_nghiep' => $nguoi->nghe_nghiep ?? 'Sinh viên',
+            'thanh_pho' => $nguoi->thanh_pho ?? '',
+            'anh_dai_dien' => $nguoi->anh_dai_dien ?? '',
+            'so_dien_thoai' => $nguoi->so_dien_thoai ?? '',
+            'email' => $nguoi->email ?? '',
+            'matching_percentage' => $nguoi->matching_percentage ?? 0,
+            'trang_thai_ket_noi' => $trangThai,
+            'tien_thue' => $nguoi->tien_thue,
+            'so_nguoi_to_da' => $nguoi->so_nguoi_to_da,
+            'co_so_vat_chat' => $nguoi->co_so_vat_chat ?? [],
+            'dia_diem_nhiem_ky' => $nguoi->dia_diem_nhiem_ky ?? [],
+            'khao_sat_loi_song' => $nguoi->khao_sat_loi_song ?? [],
+        ];
     }
 
     /**
@@ -355,7 +383,7 @@ class TimBanController extends Controller
             }
 
             // Kiểm tra xem người kia đã gửi cho mình chưa (Tránh spam 2 chiều)
-            $loiMoiNguocLai = \App\Models\LoiMoiOGhep::where('id', $id)
+            $loiMoiNguocLai = LoiMoiOGhep::where('id', $id)
                                                     ->where('id_nguoi_nhan', $idNguoiGui)
                                                     ->where('trang_thai', 'cho_duyet')
                                                     ->first();
@@ -368,14 +396,14 @@ class TimBanController extends Controller
                 $nguoiNhan = NguoiDung::find($loiMoiNguocLai->id_nguoi_nhan);
                 if ($nguoiGui && $nguoiNhan) {
                     $msg = $nguoiNhan->ho_ten . ' đã CHẤP NHẬN lời mời ở ghép của bạn!';
-                    $nguoiGui->notify(new \App\Notifications\LoiMoiOGhepNotification($loiMoiNguocLai, $msg, 'phan_hoi_loi_moi', 'dong_y'));
+                    $nguoiGui->notify(new LoiMoiOGhepNotification($loiMoiNguocLai, $msg, 'phan_hoi_loi_moi', 'dong_y'));
                 }
                 
                 return response()->json(['success' => true, 'message' => 'Người này đã gửi lời mời cho bạn trước đó. Hệ thống đã tự động kết nối hai bạn!']);
             }
 
             // Kiểm tra xem mình đã gửi lời mời chưa
-            $daTonTai = \App\Models\LoiMoiOGhep::where('id_nguoi_gui', $idNguoiGui)
+            $daTonTai = LoiMoiOGhep::where('id_nguoi_gui', $idNguoiGui)
                                                 ->where('id_nguoi_nhan', $id)
                                                 ->exists();
 
@@ -383,7 +411,7 @@ class TimBanController extends Controller
                 return response()->json(['success' => false, 'message' => 'Lời mời đã được gửi trước đó.']);
             }
 
-            $loiMoi = \App\Models\LoiMoiOGhep::create([
+            $loiMoi = LoiMoiOGhep::create([
                 'id_nguoi_gui' => $idNguoiGui,
                 'id_nguoi_nhan' => $id,
                 'trang_thai' => 'cho_duyet'
@@ -393,7 +421,7 @@ class TimBanController extends Controller
             $nguoiNhanMoi = NguoiDung::find($id);
             if ($nguoiNhanMoi) {
                 $msg = auth()->user()->ho_ten . ' đã gửi cho bạn một lời mời kết nối ở ghép.';
-                $nguoiNhanMoi->notify(new \App\Notifications\LoiMoiOGhepNotification($loiMoi, $msg, 'nhan_loi_moi'));
+                $nguoiNhanMoi->notify(new LoiMoiOGhepNotification($loiMoi, $msg, 'nhan_loi_moi'));
             }
 
             return response()->json(['success' => true, 'message' => 'Đã gửi lời mời kết nối thành công.']);
@@ -409,7 +437,7 @@ class TimBanController extends Controller
     public function chapNhanLoiMoi($id)
     {
         try {
-            $loiMoi = \App\Models\LoiMoiOGhep::where('id', $id)
+            $loiMoi = LoiMoiOGhep::where('id', $id)
                         ->where('id_nguoi_nhan', auth()->id())
                         ->first();
             
@@ -428,7 +456,7 @@ class TimBanController extends Controller
                 $nguoiGui = NguoiDung::find($loiMoi->id_nguoi_gui);
                 if ($nguoiGui) {
                     $msg = auth()->user()->ho_ten . ' đã CHẤP NHẬN lời mời ở ghép của bạn!';
-                    $nguoiGui->notify(new \App\Notifications\LoiMoiOGhepNotification($loiMoi, $msg, 'phan_hoi_loi_moi', 'dong_y'));
+                    $nguoiGui->notify(new LoiMoiOGhepNotification($loiMoi, $msg, 'phan_hoi_loi_moi', 'dong_y'));
                 }
                 
                 return response()->json(['success' => true, 'message' => 'Đã chấp nhận kết nối! Bạn có thể xem thông tin liên hệ của nhau.']);
@@ -445,7 +473,7 @@ class TimBanController extends Controller
     public function tuChoiLoiMoi($id)
     {
         try {
-            $loiMoi = \App\Models\LoiMoiOGhep::where('id', $id)
+            $loiMoi = LoiMoiOGhep::where('id', $id)
                         ->where('id_nguoi_nhan', auth()->id())
                         ->first();
             
@@ -456,7 +484,7 @@ class TimBanController extends Controller
                 $nguoiGui = NguoiDung::find($loiMoi->id_nguoi_gui);
                 if ($nguoiGui) {
                     $msg = auth()->user()->ho_ten . ' đã TỪ CHỐI lời mời ở ghép của bạn.';
-                    $nguoiGui->notify(new \App\Notifications\LoiMoiOGhepNotification($loiMoi, $msg, 'phan_hoi_loi_moi', 'tu_choi'));
+                    $nguoiGui->notify(new LoiMoiOGhepNotification($loiMoi, $msg, 'phan_hoi_loi_moi', 'tu_choi'));
                 }
                 
                 return response()->json(['success' => true, 'message' => 'Đã từ chối lời mời kết nối.']);
@@ -476,7 +504,7 @@ class TimBanController extends Controller
             $idNguoiDung = auth()->id();
             
             // Tìm lời mời kết nối giữa 2 người có trạng thái chap_nhan
-            $loiMoi = \App\Models\LoiMoiOGhep::where(function($q) use ($idNguoiDung, $id) {
+            $loiMoi = LoiMoiOGhep::where(function($q) use ($idNguoiDung, $id) {
                 $q->where('id_nguoi_gui', $idNguoiDung)->where('id_nguoi_nhan', $id);
             })->orWhere(function($q) use ($idNguoiDung, $id) {
                 $q->where('id_nguoi_gui', $id)->where('id_nguoi_nhan', $idNguoiDung);
@@ -490,7 +518,7 @@ class TimBanController extends Controller
                 $nguoiKia = NguoiDung::find($otherId);
                 if ($nguoiKia) {
                     $msg = auth()->user()->ho_ten . ' đã hủy kết nối bạn cùng phòng với bạn.';
-                    $nguoiKia->notify(new \App\Notifications\LoiMoiOGhepNotification($loiMoi, $msg, 'huy_ket_noi'));
+                    $nguoiKia->notify(new LoiMoiOGhepNotification($loiMoi, $msg, 'huy_ket_noi'));
                 }
 
                 $loiMoi->delete(); // Xóa hoàn toàn để reset trạng thái kết nối
@@ -514,7 +542,7 @@ class TimBanController extends Controller
         while (!empty($queue)) {
             $currentId = array_shift($queue);
             
-            $connections = \App\Models\LoiMoiOGhep::where('trang_thai', 'chap_nhan')
+            $connections = LoiMoiOGhep::where('trang_thai', 'chap_nhan')
                 ->where(function($q) use ($currentId) {
                     $q->where('id_nguoi_gui', $currentId)
                       ->orWhere('id_nguoi_nhan', $currentId);
@@ -545,7 +573,7 @@ class TimBanController extends Controller
         $commonIntersection = null;
         
         foreach ($groupMembers as $memberId) {
-            $user = \App\Models\NguoiDung::find($memberId);
+            $user = NguoiDung::find($memberId);
             if (!$user) {
                 continue;
             }
@@ -577,7 +605,7 @@ class TimBanController extends Controller
     {
         $minCapacity = 999;
         foreach ($memberIds as $id) {
-            $user = \App\Models\NguoiDung::find($id);
+            $user = NguoiDung::find($id);
             if ($user) {
                 $cap = $user->so_nguoi_to_da ?? ($user->khao_sat_loi_song['so_nguoi_to_da'] ?? 2);
                 if ($cap < $minCapacity) {

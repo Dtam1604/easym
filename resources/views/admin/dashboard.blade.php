@@ -3,25 +3,18 @@
 @section('title', 'Admin Dashboard - EasyM')
 
 @push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Toastify for AJAX notifications -->
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<style>
-    /* Dark Sidebar Theme Tailwind Utilities */
-    .sidebar-dark { background-color: #0f172a; color: #f8fafc; } /* slate-900 */
-    .sidebar-item:hover { background-color: #1e293b; color: #38bdf8; }
-    .sidebar-item.active { background-color: #1e293b; border-left: 4px solid #38bdf8; color: #38bdf8; }
-</style>
 @endpush
 
 @section('content')
-<div class="flex h-screen bg-gray-100 font-sans" x-data="adminDashboard()">
+<div class="flex min-h-[calc(100dvh-72px)] ops-page font-sans" x-data="adminDashboard()">
 
     <!-- 1. SIDEBAR (Dark Mode Corporate Theme) -->
-    <aside class="w-64 sidebar-dark hidden md:flex flex-col shadow-2xl z-20">
+    <aside class="w-64 sidebar-dark ops-sidebar hidden md:flex flex-col z-20">
         <div class="h-16 flex items-center justify-center border-b border-slate-800">
-            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300 tracking-wider">
-                EasyM <span class="font-light text-slate-300 text-sm">ADMIN</span>
+            <h1 class="ops-brand text-2xl">
+                EasyM <span>ADMIN</span>
             </h1>
         </div>
         <nav class="flex-1 overflow-y-auto py-4">
@@ -97,35 +90,41 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col overflow-hidden h-screen overflow-y-auto scroll-smooth pb-20">
+    <main class="flex-1 flex flex-col ops-main pb-20">
         
         <!-- Header -->
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10 sticky top-0">
-            <h2 class="text-xl font-bold text-gray-800">Bảng điều khiển Trung tâm</h2>
+        <header class="ops-header flex items-center justify-between px-6 lg:px-8 z-10 sticky top-0">
+            <div>
+                <p class="ops-kicker">Trung tâm vận hành</p>
+                <h2 class="text-xl font-black text-gray-900">Bảng điều khiển Admin</h2>
+            </div>
             <div class="flex items-center gap-4">
                 <span class="text-sm font-medium text-gray-600">Xin chào, <span class="font-bold text-blue-600">Admin Tâm</span></span>
-                <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border-2 border-blue-200">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=1769E0&color=fff" class="w-9 h-9 rounded-full border-2 border-blue-100">
             </div>
         </header>
 
-        <div class="p-8 space-y-8 max-w-7xl mx-auto w-full">
+        <div class="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
 
             <!-- 2. THỐNG KÊ TRỰC QUAN (Chart.js Analytics) -->
             <section>
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-black text-gray-800 uppercase tracking-wide"><i class="fa-solid fa-chart-line text-blue-500 mr-2"></i> Phân tích Hệ thống</h3>
+                    <div>
+                        <p class="ops-kicker">Analytics</p>
+                        <h3 class="text-xl font-black text-gray-900 mt-1"><i class="fa-solid fa-chart-line text-blue-500 mr-2"></i> Phân tích hệ thống</h3>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Bar Chart -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="text-sm font-bold text-gray-500 mb-4">MẬT ĐỘ PHÒNG TRỌ THEO KHU VỰC</h4>
+                    <div class="ops-card p-6">
+                        <h4 class="ops-kicker mb-4">Mật độ phòng trọ theo khu vực</h4>
                         <div class="h-64">
                             <canvas id="barChart"></canvas>
                         </div>
                     </div>
                     <!-- Pie Chart -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h4 class="text-sm font-bold text-gray-500 mb-4">CƠ CẤU NGƯỜI DÙNG</h4>
+                    <div class="ops-card p-6">
+                        <h4 class="ops-kicker mb-4">Cơ cấu người dùng</h4>
                         <div class="h-64 flex justify-center">
                             <canvas id="pieChart"></canvas>
                         </div>
@@ -135,22 +134,23 @@
 
             <!-- 3. QUẢN LÝ TRỌNG SỐ THUẬT TOÁN (Dynamic Configuration) -->
             <section id="weights-config" class="scroll-mt-20">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-slate-800 p-5 flex justify-between items-center">
+                <div class="ops-card overflow-hidden">
+                    <div class="ops-card-header p-5 flex justify-between items-center">
                         <div>
-                            <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-code-branch text-yellow-400 mr-2"></i> Cấu hình Thuật toán Hybrid Matching</h3>
-                            <p class="text-slate-300 text-xs mt-1">Điều chỉnh trọng số nền và hệ số ưu tiên. Áp dụng theo thời gian thực (Real-time) cho toàn bộ Client.</p>
+                            <p class="ops-kicker">Matching engine</p>
+                            <h3 class="text-lg font-black text-gray-900 mt-1"><i class="fa-solid fa-code-branch text-blue-500 mr-2"></i> Cấu hình thuật toán Hybrid Matching</h3>
+                            <p class="text-gray-500 text-xs mt-1">Điều chỉnh trọng số nền và hệ số ưu tiên. Áp dụng theo thời gian thực cho toàn bộ client.</p>
                         </div>
                     </div>
                     
                     <div class="p-0 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="ops-table min-w-full">
+                            <thead>
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tiêu chí (Khóa)</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Trọng số nền (Base)</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Hệ số Ưu tiên (Boost)</th>
-                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Thao tác AJAX</th>
+                                    <th class="px-6 py-3 text-left">Tiêu chí</th>
+                                    <th class="px-6 py-3 text-left">Trọng số nền</th>
+                                    <th class="px-6 py-3 text-left">Hệ số ưu tiên</th>
+                                    <th class="px-6 py-3 text-right">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -169,7 +169,7 @@
                                                class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm font-semibold">
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
-                                        <button @click="updateWeight({{ $ts->id }})" class="bg-emerald-100 text-emerald-700 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                                        <button @click="updateWeight({{ $ts->id }})" class="ops-action-primary min-h-0 px-3 py-1.5 text-xs">
                                             <i class="fa-solid fa-floppy-disk mr-1"></i> Cập nhật
                                         </button>
                                     </td>
@@ -187,10 +187,13 @@
 
             <!-- 4. QUẢN LÝ KIỂM DUYỆT (Verification Management) -->
             <section id="verification" class="scroll-mt-20">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-blue-600 p-5 flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-list-check mr-2"></i> Yêu cầu Phê duyệt Báo cáo Thực địa</h3>
-                        <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-inner">{{ count($baoCaoChoDuyet ?? []) }} chờ duyệt</span>
+                <div class="ops-card overflow-hidden">
+                    <div class="ops-card-header p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                        <div>
+                            <p class="ops-kicker">Kiểm duyệt</p>
+                            <h3 class="text-lg font-black text-gray-900 mt-1"><i class="fa-solid fa-list-check text-blue-500 mr-2"></i> Yêu cầu phê duyệt báo cáo thực địa</h3>
+                        </div>
+                        <span class="ops-badge ops-badge-red">{{ count($baoCaoChoDuyet ?? []) }} chờ duyệt</span>
                     </div>
 
                     @if(session('success'))
@@ -210,14 +213,14 @@
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
                                         <h4 class="text-lg font-bold text-gray-900">{{ $phong->tieu_de }}</h4>
-                                        <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-yellow-200">Báo cáo từ CTV</span>
+                                        <span class="ops-badge ops-badge-amber py-1 text-[10px]">Báo cáo từ CTV</span>
                                     </div>
                                     <p class="text-sm text-gray-600 mb-2"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i> {{ $phong->dia_chi_chi_tiet }}</p>
                                     
-                                    <div class="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm">
+                                    <div class="mt-3 p-4 bg-blue-50 border border-blue-100 rounded-2xl text-sm">
                                         <p class="font-bold text-blue-800 mb-1"><i class="fa-solid fa-user-check mr-1"></i> CTV Khảo sát: {{ $baoCao->congTacVien->ho_ten ?? 'Không rõ' }}</p>
                                         @php $chiTiet = is_array($baoCao->bao_cao_chi_tiet) ? $baoCao->bao_cao_chi_tiet : json_decode($baoCao->bao_cao_chi_tiet, true); @endphp
-                                        <div class="flex gap-4 mt-2">
+                                        <div class="flex flex-wrap gap-3 mt-2 font-bold text-xs">
                                             <span class="{{ isset($chiTiet['phong_giong_anh']) && $chiTiet['phong_giong_anh'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['phong_giong_anh']) && $chiTiet['phong_giong_anh'] ? 'fa-check' : 'fa-xmark' }}"></i> Giống ảnh</span>
                                             <span class="{{ isset($chiTiet['nuoc_sach']) && $chiTiet['nuoc_sach'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['nuoc_sach']) && $chiTiet['nuoc_sach'] ? 'fa-check' : 'fa-xmark' }}"></i> Nước sạch</span>
                                             <span class="{{ isset($chiTiet['an_ninh']) && $chiTiet['an_ninh'] ? 'text-emerald-600' : 'text-red-600' }}"><i class="fa-solid {{ isset($chiTiet['an_ninh']) && $chiTiet['an_ninh'] ? 'fa-check' : 'fa-xmark' }}"></i> An ninh</span>
@@ -250,20 +253,20 @@
                                 </div>
                                 <div class="flex flex-col gap-2 w-full md:w-auto">
                                     <!-- Nút mở Modal xem Ảnh pháp lý -->
-                                    <button @click="openModal({{ $phong->id }}, '{{ json_encode($phong->anh_phap_ly ?? []) }}')" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors w-full text-center">
+                                    <button @click="openModal({{ $phong->id }}, '{{ json_encode($phong->anh_phap_ly ?? []) }}')" class="ops-action-secondary w-full text-center">
                                         <i class="fa-regular fa-folder-open text-yellow-500 mr-1"></i> Hồ sơ Pháp lý
                                     </button>
                                     
                                     <div class="flex gap-2 w-full">
                                         <form action="{{ route('admin.room.approve', $baoCao->id) }}" method="POST" class="w-1/2">
                                             @csrf
-                                            <button type="submit" class="bg-emerald-600 text-white hover:bg-emerald-700 w-full px-2 py-2 rounded-lg text-sm font-bold transition-all shadow-sm">
+                                            <button type="submit" class="w-full px-2 py-2 rounded-full text-sm font-bold transition-all shadow-sm bg-emerald-600 text-white hover:bg-emerald-700">
                                                 <i class="fa-solid fa-check mr-1"></i> Duyệt
                                             </button>
                                         </form>
                                         <form action="{{ route('admin.room.reject', $baoCao->id) }}" method="POST" class="w-1/2">
                                             @csrf
-                                            <button type="submit" class="bg-red-500 text-white hover:bg-red-600 w-full px-2 py-2 rounded-lg text-sm font-bold transition-all shadow-sm" onclick="return confirm('Bạn có chắc chắn muốn từ chối báo cáo này và giáng cấp phòng?');">
+                                            <button type="submit" class="w-full px-2 py-2 rounded-full text-sm font-bold transition-all shadow-sm bg-red-600 text-white hover:bg-red-700" onclick="return confirm('Bạn có chắc chắn muốn từ chối báo cáo này và giáng cấp phòng?');">
                                                 <i class="fa-solid fa-xmark mr-1"></i> Từ chối
                                             </button>
                                         </form>

@@ -3,23 +3,24 @@
 @section('title', 'Quản lý phòng trọ - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
+<div class="ops-page py-8 sm:py-10">
+    <div class="ops-shell space-y-6">
         <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="ops-card p-5 sm:p-6 lg:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                <p class="ops-kicker">Chủ trọ</p>
+                <h1 class="ops-title text-2xl sm:text-3xl mt-1 flex items-center gap-3">
                     <i class="fa-solid fa-house-user text-blue-600"></i> Quản lý phòng đã đăng
                 </h1>
                 <p class="text-gray-500 mt-2">Theo dõi trạng thái và yêu cầu xác thực các phòng trọ của bạn.</p>
             </div>
-            <a href="{{ route('chutro.phong.create') }}" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 hover:shadow-blue-200 transition-all focus:ring-4 focus:ring-blue-100">
+            <a href="{{ route('chutro.phong.create') }}" class="ops-action-primary min-h-[2.75rem] px-6">
                 <i class="fa-solid fa-plus mr-2"></i> Đăng phòng mới
             </a>
         </div>
 
         @if(session('success'))
-            <div class="mb-6 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl flex items-center gap-3">
+            <div class="ops-card p-4 bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-3">
                 <i class="fa-solid fa-circle-check text-xl"></i>
                 <span class="font-medium">{{ session('success') }}</span>
             </div>
@@ -29,7 +30,7 @@
         @if($danhSachPhong->count() > 0)
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 @foreach($danhSachPhong as $phong)
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row transition-shadow hover:shadow-md">
+                    <div class="ops-card overflow-hidden flex flex-col md:flex-row transition-shadow hover:shadow-md">
                         <!-- Thumbnail -->
                         <div class="w-full md:w-48 h-48 md:h-auto bg-gray-200 relative shrink-0">
                             @php
@@ -46,7 +47,7 @@
 
                             <!-- Status Badge Float -->
                             <div class="absolute top-3 left-3 flex flex-col gap-2">
-                                <button onclick="toggleTrangThaiThue({{ $phong->id }})" id="badge-status-{{ $phong->id }}" title="Click để thay đổi trạng thái" class="px-3 py-1 text-xs font-bold rounded-full shadow-md transition-colors border {{ $phong->trang_thai_thue == 1 ? 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200' : 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' }}">
+                                <button onclick="toggleTrangThaiThue({{ $phong->id }})" id="badge-status-{{ $phong->id }}" title="Click để thay đổi trạng thái" class="ops-badge {{ $phong->trang_thai_thue == 1 ? 'ops-badge-green hover:bg-emerald-100' : 'ops-badge-red hover:bg-red-100' }}">
                                     @if($phong->trang_thai_thue == 1)
                                         <i class="fa-solid fa-door-open mr-1"></i> Đang trống (Nhấn để đổi)
                                     @else
@@ -81,21 +82,21 @@
 
                             <!-- Actions & Verification Status -->
                             <div class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between gap-2" id="verification-container-{{ $phong->id }}">
-                                <a href="{{ route('chutro.phong.edit', $phong->id) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-sm font-bold transition-colors">
+                                <a href="{{ route('chutro.phong.edit', $phong->id) }}" class="ops-action-secondary min-h-0 py-1.5">
                                     <i class="fa-solid fa-pen-to-square mr-1"></i> Sửa
                                 </a>
 
                                 <div class="flex-1 flex justify-end">
                                     @if($phong->muc_do_xac_thuc == 0)
-                                        <button onclick="yeuCauXacThuc({{ $phong->id }})" class="text-sm font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors border border-amber-200 w-full sm:w-auto text-center">
+                                        <button onclick="yeuCauXacThuc({{ $phong->id }})" class="ops-action-secondary min-h-0 py-1.5 text-amber-700 border-amber-200 w-full sm:w-auto text-center">
                                             <i class="fa-solid fa-paper-plane mr-1"></i> Yêu cầu xác thực
                                         </button>
                                     @elseif($phong->muc_do_xac_thuc == 1)
-                                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-amber-50 text-amber-600 border border-amber-200 justify-center">
+                                        <span class="ops-badge ops-badge-amber justify-center">
                                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> Đang chờ duyệt
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 justify-center">
+                                        <span class="ops-badge ops-badge-green justify-center">
                                             <i class="fa-solid fa-shield-check mr-2"></i> Đã xác thực
                                         </span>
                                     @endif
@@ -112,13 +113,13 @@
             </div>
         @else
             <!-- Empty State -->
-            <div class="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+            <div class="ops-card border-dashed p-12 text-center">
                 <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fa-solid fa-house-circle-xmark text-3xl text-gray-400"></i>
                 </div>
                 <h3 class="text-lg font-bold text-gray-900 mb-2">Chưa có phòng trọ nào</h3>
                 <p class="text-gray-500 mb-6">Bạn chưa đăng tin cho thuê phòng nào trên hệ thống.</p>
-                <a href="{{ route('chutro.phong.create') }}" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all">
+                <a href="{{ route('chutro.phong.create') }}" class="ops-action-primary">
                     Đăng tin ngay
                 </a>
             </div>

@@ -37,9 +37,9 @@ Route::get('/storage/thuc_dia/{filename}', function ($filename) {
     abort(404);
 });
 
-// Chuyển hướng trang chủ mặc định vào thẳng màn hình Tìm kiếm phòng trọ
+// Trang chủ giới thiệu (Landing Page)
 Route::get('/', function() {
-    return redirect()->route('search.results');
+    return view('welcome');
 });
 
 /*

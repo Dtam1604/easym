@@ -3,17 +3,18 @@
 @section('title', 'Định danh điện tử (KYC) - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 py-10">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="ops-page py-8 sm:py-10">
+    <div class="ops-shell max-w-3xl space-y-6">
         
         <!-- Header -->
-        <div class="mb-8 text-center">
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight mb-2">Xác thực Định danh (KYC)</h1>
+        <div class="ops-card p-5 sm:p-6 text-center">
+            <p class="ops-kicker">Định danh điện tử</p>
+            <h1 class="ops-title text-2xl sm:text-3xl mt-1 mb-2">Xác thực định danh (KYC)</h1>
             <p class="text-gray-500">Tải lên giấy tờ tùy thân của bạn để nâng cấp độ tin cậy của tài khoản.</p>
         </div>
 
         @if(session('success'))
-        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center shadow-sm">
+        <div class="ops-card p-4 bg-emerald-50 border-emerald-200 text-emerald-800 flex items-center">
             <i class="fa-solid fa-circle-check text-2xl mr-3 text-emerald-500"></i>
             <div>
                 <h4 class="font-bold text-sm">Thành công!</h4>
@@ -22,10 +23,10 @@
         </div>
         @endif
 
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="ops-card overflow-hidden">
             
             <!-- Status Card -->
-            <div class="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="ops-card-header p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                     <h3 class="text-lg font-bold text-gray-900">Trạng thái hồ sơ</h3>
                     <p class="text-sm text-gray-500 mt-1">
@@ -42,19 +43,19 @@
                 </div>
                 <div>
                     @if($user->da_xac_thuc_cccd == true)
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-black bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200">
+                        <span class="ops-badge ops-badge-green text-sm px-4 py-2">
                             <i class="fa-solid fa-shield-check mr-2"></i> Đã xác thực
                         </span>
                     @elseif(isset($user->thong_tin_cccd['trang_thai']) && $user->thong_tin_cccd['trang_thai'] === 'tu_choi')
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-black bg-red-100 text-red-700 shadow-sm border border-red-200">
+                        <span class="ops-badge ops-badge-red text-sm px-4 py-2">
                             <i class="fa-solid fa-circle-xmark mr-2"></i> Bị từ chối
                         </span>
                     @elseif($user->thong_tin_cccd !== null)
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-black bg-amber-100 text-amber-700 shadow-sm border border-amber-200">
+                        <span class="ops-badge ops-badge-amber text-sm px-4 py-2">
                             <i class="fa-solid fa-clock-rotate-left mr-2"></i> Chờ duyệt
                         </span>
                     @else
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-black bg-gray-100 text-gray-700 shadow-sm border border-gray-200">
+                        <span class="ops-badge text-sm px-4 py-2">
                             <i class="fa-solid fa-triangle-exclamation mr-2"></i> Chưa xác thực
                         </span>
                     @endif
@@ -79,7 +80,7 @@
                             <!-- Mặt trước -->
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Ảnh mặt trước CCCD/Thẻ SV <span class="text-red-500">*</span></label>
-                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-blue-400 transition-colors bg-gray-50 relative group overflow-hidden" id="container_mat_truoc_cccd">
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-200 border-dashed rounded-2xl hover:border-blue-400 transition-colors bg-blue-50/30 relative group overflow-hidden" id="container_mat_truoc_cccd">
                                     <div class="space-y-2 text-center relative z-10" id="placeholder_mat_truoc_cccd">
                                         <i class="fa-regular fa-id-card text-4xl text-gray-400 group-hover:text-blue-500 transition-colors"></i>
                                         <div class="flex text-sm text-gray-600 justify-center">
@@ -99,7 +100,7 @@
                             <!-- Mặt sau -->
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Ảnh mặt sau CCCD/Thẻ SV <span class="text-red-500">*</span></label>
-                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-blue-400 transition-colors bg-gray-50 relative group overflow-hidden" id="container_mat_sau_cccd">
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-200 border-dashed rounded-2xl hover:border-blue-400 transition-colors bg-blue-50/30 relative group overflow-hidden" id="container_mat_sau_cccd">
                                     <div class="space-y-2 text-center relative z-10" id="placeholder_mat_sau_cccd">
                                         <i class="fa-regular fa-address-card text-4xl text-gray-400 group-hover:text-blue-500 transition-colors"></i>
                                         <div class="flex text-sm text-gray-600 justify-center">
@@ -120,7 +121,7 @@
                             <!-- Sổ đỏ (Chỉ dành cho chủ trọ) -->
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Ảnh chụp Sổ đỏ / Giấy tờ nhà đất <span class="text-red-500">*</span></label>
-                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-2xl hover:border-blue-400 transition-colors bg-gray-50 relative group overflow-hidden" id="container_so_do">
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-emerald-200 border-dashed rounded-2xl hover:border-emerald-400 transition-colors bg-emerald-50/30 relative group overflow-hidden" id="container_so_do">
                                     <div class="space-y-2 text-center relative z-10" id="placeholder_so_do">
                                         <i class="fa-solid fa-file-contract text-4xl text-gray-400 group-hover:text-blue-500 transition-colors"></i>
                                         <div class="flex text-sm text-gray-600 justify-center">
@@ -146,7 +147,7 @@
                         </div>
 
                         <div class="flex justify-end pt-4">
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-3 px-8 rounded-xl shadow-lg shadow-blue-200 transition-transform transform hover:-translate-y-1">
+                            <button type="submit" class="ops-action-primary min-h-[2.75rem] px-8">
                                 <i class="fa-solid fa-paper-plane mr-2"></i> Gửi hồ sơ KYC
                             </button>
                         </div>

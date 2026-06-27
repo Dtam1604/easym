@@ -5,126 +5,175 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'EasyM - Tìm bạn ở ghép')</title>
-    <!-- Tailwind CSS qua CDN de demo nhanh -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-    <!-- Alpine.js -->
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @stack('styles')
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased overflow-x-hidden">
-    <!-- Navbar Header -->
-    <nav class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center px-4 md:px-8 sticky top-0 z-[100]">
-        <a href="/" class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-400">
-            EasyM.
-        </a>
-        <div class="ml-auto flex items-center gap-6 hidden md:flex">
-            @if(!auth()->check() || auth()->user()->vai_tro === 'nguoi_tim_tro' || auth()->user()->vai_tro === 'admin')
-                <a href="{{ route('survey.show') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Khảo sát</a>
-                <a href="{{ route('tim-ban.index') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Tìm bạn</a>
-            @endif
-            <a href="{{ route('search.results') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Tìm phòng</a>
-            
-            @auth
-                @if(auth()->user()->vai_tro === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Admin</a>
+<body class="text-zinc-900 antialiased overflow-x-hidden">
+    <nav class="easym-nav sticky top-0 z-[100]" x-data="{ mobileOpen: false, notificationsOpen: false }">
+        <div class="easym-shell h-full flex items-center gap-5">
+            <a href="/" class="easym-logo" aria-label="EasyM">
+                <span>Easy</span>M.
+            </a>
+
+            <div class="hidden lg:flex items-center gap-1 ml-3">
+                @if(!auth()->check() || auth()->user()->vai_tro === 'nguoi_tim_tro' || auth()->user()->vai_tro === 'admin')
+                    <a href="{{ route('survey.show') }}" class="easym-nav-link px-3">Khảo sát</a>
+                    <a href="{{ route('tim-ban.index') }}" class="easym-nav-link px-3">Tìm bạn</a>
                 @endif
-                @if(auth()->user()->vai_tro === 'cong_tac_vien')
-                    <a href="{{ route('ctv.index') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Dashboard CTV</a>
-                @endif
-                @if(auth()->user()->vai_tro === 'chu_tro')
-                    <a href="{{ route('chutro.phong') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Quản lý phòng</a>
-                    <a href="{{ route('chutro.lich_hen') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Lịch hẹn</a>
-                @endif
-                <div class="h-6 w-px bg-gray-200"></div>
-                <div class="flex items-center gap-4">
-                    
-                    <!-- Nút Thông báo -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="text-gray-500 hover:text-blue-600 transition-colors relative mt-1">
-                            <i class="fa-solid fa-bell text-xl"></i>
+                <a href="{{ route('search.results') }}" class="easym-nav-link px-3">Tìm phòng</a>
+
+                @auth
+                    @if(auth()->user()->vai_tro === 'admin')
+                        <a href="{{ route('admin.dashboard') }}" class="easym-nav-link px-3">Admin</a>
+                    @endif
+                    @if(auth()->user()->vai_tro === 'cong_tac_vien')
+                        <a href="{{ route('ctv.index') }}" class="easym-nav-link px-3">Dashboard CTV</a>
+                    @endif
+                    @if(auth()->user()->vai_tro === 'chu_tro')
+                        <a href="{{ route('chutro.phong') }}" class="easym-nav-link px-3">Quản lý phòng</a>
+                        <a href="{{ route('chutro.lich_hen') }}" class="easym-nav-link px-3">Lịch hẹn</a>
+                    @endif
+                @endauth
+            </div>
+
+            <div class="ml-auto hidden lg:flex items-center gap-4">
+                @auth
+                    <div class="relative">
+                        <button @click="notificationsOpen = !notificationsOpen"
+                            class="relative grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 hover:text-blue-600 hover:border-blue-200"
+                            aria-label="Thông báo">
+                            <i class="fa-regular fa-bell"></i>
                             @if(auth()->user()->unreadNotifications->count() > 0)
-                                <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
-                                    {{ auth()->user()->unreadNotifications->count() }}
-                                </span>
+                                <span class="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-blue-600 ring-2 ring-white"></span>
                             @endif
                         </button>
 
-                        <div x-show="open" @click.away="open = false" style="display: none;" class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                            <div class="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                <h3 class="font-bold text-gray-800">Thông báo</h3>
+                        <div x-show="notificationsOpen"
+                             x-transition:enter="transition ease-out duration-180"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             @click.away="notificationsOpen = false"
+                             style="display: none;"
+                             class="absolute right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                            <div class="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
+                                <h3 class="text-sm font-extrabold text-slate-900">Thông báo</h3>
                                 @if(auth()->user()->unreadNotifications->count() > 0)
-                                    <form action="{{ route('thong_bao.doc_tat_ca') }}" method="POST" class="m-0">
+                                    <form action="{{ route('thong_bao.doc_tat_ca') }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="text-xs text-blue-600 hover:text-blue-800 font-medium bg-blue-50 px-2 py-1 rounded-md">Đánh dấu đã đọc</button>
+                                        <button type="submit" class="rounded-full border border-blue-100 bg-white px-3 py-1.5 text-xs font-bold text-blue-600 hover:bg-blue-50">
+                                            Đọc tất cả
+                                        </button>
                                     </form>
                                 @endif
                             </div>
                             <div class="max-h-80 overflow-y-auto">
                                 @forelse(auth()->user()->notifications()->limit(5)->get() as $notification)
-                                    <a href="{{ route('thong_bao.doc', $notification->id) }}" class="block p-3 border-b border-gray-50 hover:bg-slate-50 transition-colors {{ $notification->read_at ? 'opacity-70' : 'bg-blue-50/30' }}">
+                                    <a href="{{ route('thong_bao.doc', $notification->id) }}" class="block border-b border-slate-100 p-4 hover:bg-slate-50 {{ $notification->read_at ? 'opacity-65' : 'bg-blue-50/20' }}">
                                         <div class="flex gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                                                <i class="fa-solid {{ $notification->data['icon'] ?? 'fa-bell' }} {{ $notification->data['color'] ?? 'text-gray-500' }} text-sm"></i>
+                                            <div class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-500">
+                                                <i class="fa-solid {{ $notification->data['icon'] ?? 'fa-bell' }} {{ $notification->data['color'] ?? 'text-zinc-500' }} text-xs"></i>
                                             </div>
                                             <div>
-                                                <p class="text-sm text-gray-800 {{ $notification->read_at ? '' : 'font-bold' }}">
+                                                <p class="text-xs leading-relaxed text-slate-800 {{ $notification->read_at ? 'font-medium' : 'font-extrabold' }}">
                                                     {{ $notification->data['message'] ?? 'Bạn có thông báo mới' }}
                                                 </p>
-                                                <p class="text-[11px] text-gray-500 mt-1 font-medium">{{ $notification->created_at->diffForHumans() }}</p>
+                                                <p class="mt-1 text-[11px] font-medium text-slate-400">{{ $notification->created_at->diffForHumans() }}</p>
                                             </div>
                                         </div>
                                     </a>
                                 @empty
-                                    <div class="p-8 text-center text-gray-400 text-sm">
-                                        <i class="fa-regular fa-bell-slash text-3xl mb-3 text-gray-300"></i><br>
-                                        Bạn chưa có thông báo nào
+                                    <div class="px-6 py-10 text-center text-sm font-medium text-slate-500">
+                                        Chưa có thông báo mới
                                     </div>
                                 @endforelse
                             </div>
-                            <div class="p-2 text-center border-t border-gray-100 bg-gray-50">
-                                <a href="{{ route('thong_bao.index') }}" class="text-sm font-bold text-blue-600 hover:text-blue-800 block py-1">Xem tất cả thông báo</a>
+                            <div class="border-t border-slate-100 bg-slate-50 p-3 text-center">
+                                <a href="{{ route('thong_bao.index') }}" class="text-xs font-extrabold text-slate-500 hover:text-blue-600">Xem tất cả</a>
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('kyc.form') }}" title="Xác thực danh tính">
+
+                    <a href="{{ route('kyc.form') }}" class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white" title="Xác thực danh tính">
                         @if(auth()->user()->da_xac_thuc_cccd)
-                            <i class="fa-solid fa-shield-check text-emerald-500 text-lg hover:text-emerald-600 transition-colors"></i>
+                            <i class="fa-solid fa-shield-check text-emerald-600"></i>
                         @elseif(auth()->user()->thong_tin_cccd)
-                            <i class="fa-solid fa-clock-rotate-left text-amber-500 text-lg hover:text-amber-600 transition-colors"></i>
+                            <i class="fa-regular fa-clock text-amber-600"></i>
                         @else
-                            <i class="fa-solid fa-shield-halved text-gray-400 text-lg hover:text-blue-500 transition-colors"></i>
+                            <i class="fa-solid fa-shield-halved text-slate-400"></i>
                         @endif
                     </a>
-                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 hover:bg-gray-100 py-1.5 px-3 rounded-xl transition-colors cursor-pointer">
-                        <img src="{{ auth()->user()->anh_dai_dien ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->ho_ten).'&background=e0f2fe&color=0369a1' }}" class="w-8 h-8 rounded-full border border-gray-200 object-cover">
-                        <span class="text-sm font-bold text-gray-700 flex items-center gap-1">
-                            {{ auth()->user()->ho_ten }}
-                            @if(auth()->user()->da_xac_thuc_cccd)
-                                <i class="fa-solid fa-circle-check text-blue-500 text-[12px]" title="Tài khoản đã xác thực"></i>
-                            @endif
-                        </span>
+
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 hover:border-blue-200">
+                        <img src="{{ auth()->user()->anh_dai_dien ?? 'https://ui-avatars.com/api/?name='.urlencode(auth()->user()->ho_ten).'&background=f3f7fb&color=1769e0' }}" class="h-9 w-9 rounded-full object-cover">
+                        <div class="leading-tight">
+                            <span class="block max-w-36 truncate text-xs font-extrabold text-slate-900">{{ auth()->user()->ho_ten }}</span>
+                            <span class="block text-[11px] font-medium capitalize text-slate-500">{{ str_replace('_', ' ', auth()->user()->vai_tro) }}</span>
+                        </div>
                     </a>
-                    <form method="POST" action="{{ route('logout') }}" class="m-0">
+
+                    <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-sm font-bold text-red-500 hover:text-red-700 transition-colors">
-                            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Đăng xuất
+                        <button type="submit" class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 hover:border-red-200 hover:text-red-600" aria-label="Đăng xuất">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         </button>
                     </form>
+                @else
+                    <a href="{{ route('login') }}" class="easym-nav-link px-3">Đăng nhập</a>
+                    <a href="{{ route('register') }}" class="easym-btn easym-btn-primary px-5 py-3 text-sm">Đăng ký</a>
+                @endauth
+            </div>
+
+            <button @click="mobileOpen = !mobileOpen"
+                    class="ml-auto grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 lg:hidden"
+                    aria-label="Mở menu">
+                <i class="fa-solid" :class="mobileOpen ? 'fa-xmark' : 'fa-bars'"></i>
+            </button>
+        </div>
+
+        <div x-show="mobileOpen"
+             x-transition
+             style="display: none;"
+             class="border-t border-slate-200 bg-white lg:hidden">
+            <div class="easym-shell py-4">
+                <div class="grid gap-1">
+                    @if(!auth()->check() || auth()->user()->vai_tro === 'nguoi_tim_tro' || auth()->user()->vai_tro === 'admin')
+                        <a href="{{ route('survey.show') }}" class="easym-nav-link rounded-xl px-3">Khảo sát</a>
+                        <a href="{{ route('tim-ban.index') }}" class="easym-nav-link rounded-xl px-3">Tìm bạn</a>
+                    @endif
+                    <a href="{{ route('search.results') }}" class="easym-nav-link rounded-xl px-3">Tìm phòng</a>
+
+                    @auth
+                        @if(auth()->user()->vai_tro === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" class="easym-nav-link rounded-xl px-3">Admin</a>
+                        @endif
+                        @if(auth()->user()->vai_tro === 'cong_tac_vien')
+                            <a href="{{ route('ctv.index') }}" class="easym-nav-link rounded-xl px-3">Dashboard CTV</a>
+                        @endif
+                        @if(auth()->user()->vai_tro === 'chu_tro')
+                            <a href="{{ route('chutro.phong') }}" class="easym-nav-link rounded-xl px-3">Quản lý phòng</a>
+                            <a href="{{ route('chutro.lich_hen') }}" class="easym-nav-link rounded-xl px-3">Lịch hẹn</a>
+                        @endif
+                        <a href="{{ route('thong_bao.index') }}" class="easym-nav-link rounded-xl px-3">Thông báo</a>
+                        <a href="{{ route('profile.edit') }}" class="easym-nav-link rounded-xl px-3">Hồ sơ</a>
+                        <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                            @csrf
+                            <button type="submit" class="easym-btn easym-btn-secondary w-full px-4 py-3 text-sm">Đăng xuất</button>
+                        </form>
+                    @else
+                        <div class="grid grid-cols-2 gap-3 pt-3">
+                            <a href="{{ route('login') }}" class="easym-btn easym-btn-secondary px-4 py-3 text-sm">Đăng nhập</a>
+                            <a href="{{ route('register') }}" class="easym-btn easym-btn-primary px-4 py-3 text-sm">Đăng ký</a>
+                        </div>
+                    @endauth
                 </div>
-            @else
-                <div class="h-6 w-px bg-gray-200"></div>
-                <a href="{{ route('login') }}" class="text-gray-600 hover:text-blue-600 font-bold transition-colors text-sm">Đăng nhập</a>
-                <a href="{{ route('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition-colors text-sm shadow-sm">Đăng ký</a>
-            @endauth
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main>
         @yield('content')
     </main>

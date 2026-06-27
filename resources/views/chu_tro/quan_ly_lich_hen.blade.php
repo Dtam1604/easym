@@ -3,12 +3,13 @@
 @section('title', 'Quản lý lịch hẹn - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
+<div class="ops-page py-8 sm:py-10">
+    <div class="ops-shell space-y-6">
         <!-- Header Section -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="ops-card p-5 sm:p-6 lg:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                <p class="ops-kicker">Chủ trọ</p>
+                <h1 class="ops-title text-2xl sm:text-3xl mt-1 flex items-center gap-3">
                     <i class="fa-regular fa-calendar-check text-blue-600"></i> Quản lý lịch hẹn xem phòng
                 </h1>
                 <p class="text-gray-500 mt-2">Xem và duyệt các yêu cầu đặt lịch từ người tìm trọ.</p>
@@ -17,7 +18,11 @@
 
         <!-- List/Grid of Bookings -->
         @if($danhSachLichHen->count() > 0)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="ops-card overflow-hidden">
+                <div class="ops-card-header p-5">
+                    <p class="ops-kicker">Yêu cầu xem phòng</p>
+                    <h2 class="text-lg font-black text-gray-900 mt-1">{{ $danhSachLichHen->total() }} lịch hẹn</h2>
+                </div>
                 <ul class="divide-y divide-gray-100">
                     @foreach($danhSachLichHen as $lichHen)
                         <li class="p-6 hover:bg-slate-50 transition-colors flex flex-col md:flex-row gap-6 items-start md:items-center" id="booking-item-{{ $lichHen->id }}">
@@ -27,11 +32,11 @@
                                         <i class="fa-solid fa-user-circle text-gray-400 mr-1"></i> {{ $lichHen->nguoiThue->ho_ten ?? 'Người dùng ẩn danh' }}
                                     </h3>
                                     @if($lichHen->trang_thai_cuoc_hen === 'cho_duyet')
-                                        <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-yellow-200">Đang chờ xử lý</span>
+                                        <span class="ops-badge ops-badge-amber py-1 text-[10px] uppercase">Đang chờ xử lý</span>
                                     @elseif($lichHen->trang_thai_cuoc_hen === 'da_duyet')
-                                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-200">Đã duyệt</span>
+                                        <span class="ops-badge ops-badge-green py-1 text-[10px] uppercase">Đã duyệt</span>
                                     @else
-                                        <span class="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border border-red-200">Đã từ chối</span>
+                                        <span class="ops-badge ops-badge-red py-1 text-[10px] uppercase">Đã từ chối</span>
                                     @endif
                                 </div>
                                 <div class="space-y-1 text-sm text-gray-600">
@@ -43,10 +48,10 @@
                             
                             @if($lichHen->trang_thai_cuoc_hen === 'cho_duyet')
                                 <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto" id="actions-{{ $lichHen->id }}">
-                                    <button onclick="capNhatLichHen({{ $lichHen->id }}, 'da_duyet')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-sm">
+                                    <button onclick="capNhatLichHen({{ $lichHen->id }}, 'da_duyet')" class="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 transition-colors flex justify-center items-center gap-2 shadow-sm">
                                         <i class="fa-solid fa-check"></i> Duyệt lịch
                                     </button>
-                                    <button onclick="capNhatLichHen({{ $lichHen->id }}, 'tu_choi')" class="bg-white hover:bg-red-50 text-red-600 font-bold py-2 px-4 rounded-lg border border-red-200 transition-colors flex justify-center items-center gap-2">
+                                    <button onclick="capNhatLichHen({{ $lichHen->id }}, 'tu_choi')" class="ops-action-danger min-h-0 py-2">
                                         <i class="fa-solid fa-xmark"></i> Từ chối
                                     </button>
                                 </div>
@@ -62,7 +67,7 @@
             </div>
         @else
             <!-- Empty State -->
-            <div class="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+            <div class="ops-card border-dashed p-12 text-center">
                 <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fa-regular fa-calendar-xmark text-3xl text-gray-400"></i>
                 </div>

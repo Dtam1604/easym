@@ -3,7 +3,7 @@
 @section('title', 'Đặt lại mật khẩu - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+<div class="ops-page flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 class="mt-6 text-center text-3xl font-black text-gray-900 tracking-tight">
             Đặt lại mật khẩu mới
@@ -14,10 +14,10 @@
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-gray-100">
+        <div class="ops-card py-8 px-4 sm:px-10">
             
             @if(session('error'))
-            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm font-medium rounded-r-xl">
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm font-medium rounded-2xl">
                 {{ session('error') }}
             </div>
             @endif
@@ -48,7 +48,7 @@
                 </div>
 
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-extrabold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <button type="submit" class="ops-action-primary w-full min-h-[2.75rem]">
                         Đặt lại mật khẩu
                     </button>
                 </div>

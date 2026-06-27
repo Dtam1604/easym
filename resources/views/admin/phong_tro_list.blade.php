@@ -2,23 +2,14 @@
 
 @section('title', 'Quản lý Tất cả Phòng trọ - Admin EasyM')
 
-@push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-    .sidebar-dark { background-color: #0f172a; color: #f8fafc; }
-    .sidebar-item:hover { background-color: #1e293b; color: #38bdf8; }
-    .sidebar-item.active { background-color: #1e293b; border-left: 4px solid #38bdf8; color: #38bdf8; }
-</style>
-@endpush
-
 @section('content')
-<div class="flex h-screen bg-gray-50 font-sans">
+<div class="flex min-h-[calc(100dvh-72px)] ops-page font-sans">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 sidebar-dark hidden md:flex flex-col shadow-2xl z-20">
+    <aside class="w-64 sidebar-dark ops-sidebar hidden md:flex flex-col z-20">
         <div class="h-16 flex items-center justify-center border-b border-slate-800">
-            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300 tracking-wider">
-                EasyM <span class="font-light text-slate-300 text-sm">ADMIN</span>
+            <h1 class="ops-brand text-2xl">
+                EasyM <span>ADMIN</span>
             </h1>
         </div>
         <nav class="flex-1 overflow-y-auto py-4">
@@ -76,24 +67,27 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col overflow-hidden h-screen overflow-y-auto scroll-smooth">
+    <main class="flex-1 flex flex-col ops-main">
         <!-- Header -->
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10 sticky top-0">
+        <header class="ops-header flex items-center justify-between px-6 lg:px-8 z-10 sticky top-0">
             <div class="flex items-center">
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-blue-600 mr-4">
+                <a href="{{ route('admin.dashboard') }}" class="ops-action-secondary min-h-0 w-10 h-10 p-0 mr-4" aria-label="Quay lại dashboard">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
-                <h2 class="text-xl font-bold text-gray-800">Quản lý Tất cả Phòng trọ</h2>
+                <div>
+                    <p class="ops-kicker">Kho tin đăng</p>
+                    <h2 class="text-xl font-black text-gray-900">Quản lý phòng trọ</h2>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <span class="text-sm font-medium text-gray-600">Xin chào, <span class="font-bold text-blue-600">Admin Tâm</span></span>
-                <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border-2 border-blue-200">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=1769E0&color=fff" class="w-9 h-9 rounded-full border-2 border-blue-100">
             </div>
         </header>
 
         <div class="p-8 space-y-6 max-w-7xl mx-auto w-full">
             @if(session('success'))
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded shadow-sm">
+                <div class="ops-card bg-emerald-50 border-emerald-200 p-4 mb-6">
                     <div class="flex items-center">
                         <i class="fa-solid fa-circle-check text-emerald-500 mr-3"></i>
                         <p class="text-emerald-700 font-medium">{{ session('success') }}</p>
@@ -101,7 +95,7 @@
                 </div>
             @endif
             @if(session('error'))
-                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded shadow-sm">
+                <div class="ops-card bg-red-50 border-red-200 p-4 mb-6">
                     <div class="flex items-center">
                         <i class="fa-solid fa-circle-xmark text-red-500 mr-3"></i>
                         <p class="text-red-700 font-medium">{{ session('error') }}</p>
@@ -109,33 +103,36 @@
                 </div>
             @endif
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-list mr-2 text-blue-500"></i> Danh sách phòng trọ hiện có</h3>
-                    <span class="text-sm text-gray-500">Tổng cộng: <span class="font-bold text-blue-600">{{ $phongTros->total() }}</span> phòng</span>
+            <div class="ops-card overflow-hidden">
+                <div class="ops-card-header p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <div>
+                        <p class="ops-kicker">Danh sách</p>
+                        <h3 class="font-black text-gray-900 text-lg mt-1"><i class="fa-solid fa-list mr-2 text-blue-500"></i> Phòng trọ hiện có</h3>
+                    </div>
+                    <span class="ops-badge ops-badge-blue">{{ $phongTros->total() }} phòng</span>
                 </div>
                 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="ops-table">
                         <thead>
-                            <tr class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider">
-                                <th class="p-4 border-b font-bold">ID</th>
-                                <th class="p-4 border-b font-bold">Phòng trọ / Địa chỉ</th>
-                                <th class="p-4 border-b font-bold">Giá & Diện tích</th>
-                                <th class="p-4 border-b font-bold">Chủ trọ</th>
-                                <th class="p-4 border-b font-bold text-center">Trạng thái</th>
-                                <th class="p-4 border-b font-bold text-center">Thao tác</th>
+                            <tr>
+                                <th class="p-4 text-left">ID</th>
+                                <th class="p-4 text-left">Phòng trọ / địa chỉ</th>
+                                <th class="p-4 text-left">Giá & diện tích</th>
+                                <th class="p-4 text-left">Chủ trọ</th>
+                                <th class="p-4 text-center">Trạng thái</th>
+                                <th class="p-4 text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             @forelse($phongTros as $phong)
-                            <tr class="hover:bg-blue-50/50 transition-colors">
+                            <tr>
                                 <td class="p-4 align-top">
                                     <span class="text-gray-500 font-bold text-sm">#{{ $phong->id }}</span>
                                 </td>
                                 <td class="p-4 align-top max-w-xs">
                                     <div class="flex gap-3">
-                                        <div class="w-16 h-16 rounded bg-gray-200 flex-shrink-0 overflow-hidden border border-gray-300">
+                                        <div class="w-16 h-16 rounded-xl bg-gray-200 flex-shrink-0 overflow-hidden border border-gray-200">
                                             @if(!empty($phong->anh_phong) && is_array($phong->anh_phong) && isset($phong->anh_phong[0]))
                                                 <img src="{{ $phong->anh_phong[0] }}" class="w-full h-full object-cover">
                                             @else
@@ -149,7 +146,7 @@
                                     </div>
                                 </td>
                                 <td class="p-4 align-top whitespace-nowrap">
-                                    <div class="font-bold text-red-600">{{ number_format($phong->gia_phong, 0, ',', '.') }} đ</div>
+                                    <div class="font-black text-red-600">{{ number_format($phong->gia_phong, 0, ',', '.') }} đ</div>
                                     <div class="text-xs text-gray-500 mt-1">{{ $phong->dien_tich }} m²</div>
                                 </td>
                                 <td class="p-4 align-top">
@@ -163,34 +160,34 @@
                                 </td>
                                 <td class="p-4 align-top text-center">
                                     @if($phong->trang_thai_thue == 1 || $phong->trang_thai_thue === 'con_trong')
-                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                                        <span class="ops-badge ops-badge-green py-1">
                                             Còn trống
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-gray-100 text-gray-600 border border-gray-300">
+                                        <span class="ops-badge py-1">
                                             Đã cho thuê
                                         </span>
                                     @endif
                                     
                                     <div class="mt-2">
                                         @if($phong->muc_do_xac_thuc == 2)
-                                            <span class="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200"><i class="fa-solid fa-shield-halved mr-1"></i> Đã XT</span>
+                                             <span class="ops-badge ops-badge-blue py-1 text-[10px] uppercase"><i class="fa-solid fa-shield-halved mr-1"></i> Đã XT</span>
                                         @elseif($phong->muc_do_xac_thuc == 1)
-                                            <span class="text-[10px] uppercase font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">Chờ duyệt</span>
+                                             <span class="ops-badge ops-badge-amber py-1 text-[10px] uppercase">Chờ duyệt</span>
                                         @else
-                                            <span class="text-[10px] uppercase font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">Chưa XT</span>
+                                             <span class="ops-badge py-1 text-[10px] uppercase">Chưa XT</span>
                                         @endif
                                     </div>
                                 </td>
                                 <td class="p-4 align-top text-center">
                                     <div class="flex justify-center gap-2 flex-col">
-                                        <a href="/phong-tro/{{ $phong->id }}" target="_blank" class="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded text-xs font-bold transition-colors">
+                                        <a href="/phong-tro/{{ $phong->id }}" target="_blank" class="ops-action-secondary min-h-0 py-1.5 text-xs">
                                             <i class="fa-solid fa-eye mr-1"></i> Xem
                                         </a>
                                         <form action="{{ route('admin.phongtro.destroy', $phong->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phòng trọ này vĩnh viễn khỏi hệ thống không?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="w-full px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded text-xs font-bold transition-colors border border-red-200 hover:border-red-600">
+                                            <button type="submit" class="w-full px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-full text-xs font-bold transition-colors border border-red-200 hover:border-red-600">
                                                 <i class="fa-solid fa-trash-can mr-1"></i> Xóa
                                             </button>
                                         </form>

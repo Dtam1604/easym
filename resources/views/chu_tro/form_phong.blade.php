@@ -3,22 +3,23 @@
 @section('title', isset($phong) ? 'Sửa thông tin phòng - EasyM' : 'Đăng phòng mới - EasyM')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
+<div class="ops-page py-8 sm:py-10">
+    <div class="ops-shell max-w-4xl space-y-6">
         <!-- Header Section -->
-        <div class="mb-8">
-            <a href="{{ route('chutro.phong') }}" class="text-sm font-bold text-gray-500 hover:text-blue-600 mb-2 inline-block">
-                <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại Danh sách phòng
+        <div class="ops-card p-5 sm:p-6 lg:p-7">
+            <a href="{{ route('chutro.phong') }}" class="ops-action-secondary min-h-0 py-2 mb-4">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách phòng
             </a>
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+            <p class="ops-kicker">Chủ trọ</p>
+            <h1 class="ops-title text-2xl sm:text-3xl mt-1 flex items-center gap-3">
                 <i class="fa-solid {{ isset($phong) ? 'fa-pen-to-square' : 'fa-house-medical' }} text-blue-600"></i>
-                {{ isset($phong) ? 'Cập nhật Thông tin Phòng' : 'Đăng phòng mới' }}
+                {{ isset($phong) ? 'Cập nhật thông tin phòng' : 'Đăng phòng mới' }}
             </h1>
-            <p class="text-gray-500 mt-2">Vui lòng điền đầy đủ và chính xác các thông tin dưới đây để tin đăng đạt hiệu quả cao nhất.</p>
+            <p class="text-gray-500 mt-2">Điền đầy đủ thông tin, ảnh phòng và giấy tờ xác thực để tin đăng đạt hiệu quả cao hơn.</p>
         </div>
 
         @if ($errors->any())
-            <div class="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl">
+            <div class="ops-card p-4 bg-red-50 text-red-700 border-red-200">
                 <div class="font-bold mb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Vui lòng kiểm tra lại các lỗi sau:</div>
                 <ul class="list-disc list-inside text-sm">
                     @foreach ($errors->all() as $error)
@@ -35,9 +36,10 @@
             @endif
 
             <!-- Phần 1: Thông tin cơ bản -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                    <h2 class="text-lg font-bold text-gray-900"><i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>1. Thông tin cơ bản</h2>
+            <div class="ops-card overflow-hidden">
+                <div class="ops-card-header p-6">
+                    <p class="ops-kicker">Bước 1</p>
+                    <h2 class="text-lg font-black text-gray-900 mt-1"><i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>Thông tin cơ bản</h2>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="col-span-1 md:col-span-2">
@@ -63,9 +65,10 @@
             </div>
 
             <!-- Phần 2: Vị trí và Tọa độ -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                    <h2 class="text-lg font-bold text-gray-900"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i>2. Vị trí & Địa chỉ</h2>
+            <div class="ops-card overflow-hidden">
+                <div class="ops-card-header p-6">
+                    <p class="ops-kicker">Bước 2</p>
+                    <h2 class="text-lg font-black text-gray-900 mt-1"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i>Vị trí & địa chỉ</h2>
                     <p class="text-xs text-gray-500 mt-1">Việc cung cấp toạ độ giúp phòng trọ của bạn dễ dàng được tìm thấy trên bản đồ.</p>
                 </div>
                 <div class="p-6 grid grid-cols-1 gap-6">
@@ -74,7 +77,7 @@
                         <input type="text" name="dia_chi_chi_tiet" id="dia_chi_chi_tiet" value="{{ old('dia_chi_chi_tiet', $phong->dia_chi_chi_tiet ?? '') }}" required placeholder="Số nhà, ngõ, đường, xã/phường..." class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
                         <div>
                             <label for="lat" class="block text-sm font-bold text-gray-700 mb-2">Vĩ độ (Latitude) <span class="text-red-500">*</span></label>
                             <input type="text" name="lat" id="lat" value="{{ old('lat', $phong->lat ?? '') }}" required placeholder="VD: 21.028511" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm">
@@ -91,10 +94,11 @@
             </div>
 
             <!-- Phần 3: Hình ảnh -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+            <div class="ops-card overflow-hidden">
+                <div class="ops-card-header p-6 flex justify-between items-center">
                     <div>
-                        <h2 class="text-lg font-bold text-gray-900"><i class="fa-solid fa-images text-blue-500 mr-2"></i>3. Hình ảnh</h2>
+                        <p class="ops-kicker">Bước 3</p>
+                        <h2 class="text-lg font-black text-gray-900 mt-1"><i class="fa-solid fa-images text-blue-500 mr-2"></i>Hình ảnh</h2>
                         <p class="text-xs text-gray-500 mt-1">Đăng tải hình ảnh phòng và các giấy tờ liên quan</p>
                     </div>
                 </div>
@@ -105,7 +109,7 @@
                         <label class="block text-sm font-bold text-gray-700 mb-2">Ảnh không gian phòng trọ</label>
                         <p class="text-xs text-gray-500 mb-3">Tải lên nhiều ảnh (Phòng ngủ, WC, bếp...). Hình ảnh này sẽ hiển thị công khai cho người thuê.</p>
                         
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 transition-colors">
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-blue-200 border-dashed rounded-2xl bg-blue-50/30 hover:bg-blue-50 transition-colors">
                             <div class="space-y-1 text-center">
                                 <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
                                 <div class="flex text-sm text-gray-600 justify-center">
@@ -139,7 +143,7 @@
                         <label class="block text-sm font-bold text-gray-700 mb-2">Giấy tờ Pháp lý / Sổ đỏ</label>
                         <p class="text-xs text-gray-500 mb-3">Ảnh này được <strong class="text-emerald-600">bảo mật 100%</strong> và chỉ dùng để BQL EasyM xác thực tính hợp pháp của phòng.</p>
                         
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-emerald-300 border-dashed rounded-xl bg-emerald-50/30 hover:bg-emerald-50 transition-colors">
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-emerald-300 border-dashed rounded-2xl bg-emerald-50/30 hover:bg-emerald-50 transition-colors">
                             <div class="space-y-1 text-center">
                                 <i class="fa-solid fa-file-contract text-4xl text-emerald-400 mb-3"></i>
                                 <div class="flex text-sm text-gray-600 justify-center">
@@ -172,10 +176,10 @@
 
             <!-- Submit Button -->
             <div class="flex justify-end gap-4 pt-4">
-                <a href="{{ route('chutro.phong') }}" class="px-6 py-3 rounded-xl font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors">
+                <a href="{{ route('chutro.phong') }}" class="ops-action-secondary">
                     Hủy bỏ
                 </a>
-                <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                <button type="submit" class="ops-action-primary min-h-[2.75rem] px-8">
                     <i class="fa-solid fa-floppy-disk"></i> {{ isset($phong) ? 'Lưu cập nhật' : 'Đăng phòng ngay' }}
                 </button>
             </div>

@@ -2,23 +2,14 @@
 
 @section('title', 'Quản lý Cộng tác viên (UC19) - EasyM')
 
-@push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-    .sidebar-dark { background-color: #0f172a; color: #f8fafc; }
-    .sidebar-item:hover { background-color: #1e293b; color: #38bdf8; }
-    .sidebar-item.active { background-color: #1e293b; border-left: 4px solid #38bdf8; color: #38bdf8; }
-</style>
-@endpush
-
 @section('content')
-<div class="flex h-screen bg-gray-50 font-sans" x-data="ctvManagement()">
+<div class="flex min-h-[calc(100dvh-72px)] ops-page font-sans" x-data="ctvManagement()">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 sidebar-dark hidden md:flex flex-col shadow-2xl z-20">
+    <aside class="w-64 sidebar-dark ops-sidebar hidden md:flex flex-col z-20">
         <div class="h-16 flex items-center justify-center border-b border-slate-800">
-            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-300 tracking-wider">
-                EasyM <span class="font-light text-slate-300 text-sm">ADMIN</span>
+            <h1 class="ops-brand text-2xl">
+                EasyM <span>ADMIN</span>
             </h1>
         </div>
         <nav class="flex-1 overflow-y-auto py-4">
@@ -76,24 +67,27 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col overflow-hidden h-screen overflow-y-auto scroll-smooth">
+    <main class="flex-1 flex flex-col ops-main">
         <!-- Header -->
-        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10 sticky top-0">
+        <header class="ops-header flex items-center justify-between px-6 lg:px-8 z-10 sticky top-0">
             <div class="flex items-center">
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-blue-600 mr-4">
+                <a href="{{ route('admin.dashboard') }}" class="ops-action-secondary min-h-0 w-10 h-10 p-0 mr-4" aria-label="Quay lại dashboard">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
-                <h2 class="text-xl font-bold text-gray-800">Quản lý Cộng tác viên (CTV)</h2>
+                <div>
+                    <p class="ops-kicker">Nhân sự thực địa</p>
+                    <h2 class="text-xl font-black text-gray-900">Quản lý Cộng tác viên</h2>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <span class="text-sm font-medium text-gray-600">Xin chào, <span class="font-bold text-blue-600">Admin Tâm</span></span>
-                <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full border-2 border-blue-200">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=1769E0&color=fff" class="w-9 h-9 rounded-full border-2 border-blue-100">
             </div>
         </header>
 
-        <div class="p-8 space-y-6 max-w-7xl mx-auto w-full">
+        <div class="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
             @if(session('success'))
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded shadow-sm">
+                <div class="ops-card bg-emerald-50 border-emerald-200 p-4">
                     <div class="flex items-center">
                         <i class="fa-solid fa-circle-check text-emerald-500 mr-3"></i>
                         <p class="text-emerald-700 font-medium">{{ session('success') }}</p>
@@ -102,7 +96,7 @@
             @endif
 
             @if($errors->any())
-                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+                <div class="ops-card bg-red-50 border-red-200 p-4">
                     <div class="flex items-start">
                         <i class="fa-solid fa-circle-exclamation text-red-500 mr-3 mt-0.5"></i>
                         <div>
@@ -119,7 +113,7 @@
 
             <!-- STATS COUNTER -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                <div class="ops-card p-6 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-users-gear"></i>
                     </div>
@@ -128,7 +122,7 @@
                         <div class="text-2xl font-black text-gray-800 mt-0.5">{{ $ctvs->total() }}</div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                <div class="ops-card p-6 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-house-circle-check"></i>
                     </div>
@@ -139,7 +133,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                <div class="ops-card p-6 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center text-xl shadow-inner">
                         <i class="fa-solid fa-hourglass-half"></i>
                     </div>
@@ -153,23 +147,26 @@
             </div>
 
             <!-- COLLABORATORS LIST -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-user-shield text-blue-500"></i> Danh sách Cộng tác viên (CTV)</h3>
-                    <button @click="isCreateModalOpen = true" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm">
+            <div class="ops-card overflow-hidden">
+                <div class="ops-card-header p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <div>
+                        <p class="ops-kicker">Danh sách</p>
+                        <h3 class="font-black text-gray-900 text-lg flex items-center gap-2 mt-1"><i class="fa-solid fa-user-shield text-blue-500"></i> Cộng tác viên khảo sát</h3>
+                    </div>
+                    <button @click="isCreateModalOpen = true" class="ops-action-primary">
                         <i class="fa-solid fa-user-plus"></i> Thêm CTV mới
                     </button>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="ops-table">
                         <thead>
-                            <tr class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-                                <th class="p-4 font-bold">CTV</th>
-                                <th class="p-4 font-bold">Địa bàn quản lý (Phân vùng)</th>
-                                <th class="p-4 font-bold text-center">Số tin đã xác thực</th>
-                                <th class="p-4 font-bold text-center">Trạng thái</th>
-                                <th class="p-4 font-bold text-center">Thao tác</th>
+                            <tr>
+                                <th class="p-4 text-left">CTV</th>
+                                <th class="p-4 text-left">Địa bàn quản lý</th>
+                                <th class="p-4 text-center">Đã xác thực</th>
+                                <th class="p-4 text-center">Trạng thái</th>
+                                <th class="p-4 text-center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -192,7 +189,7 @@
                                 </td>
                                 <td class="p-4 align-middle">
                                     <div class="flex items-center gap-2">
-                                        <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-1 shadow-sm">
+                                        <span class="ops-badge py-1">
                                             <i class="fa-solid fa-location-crosshairs text-sky-500"></i>
                                             {{ $ctv->dia_ban_quan_ly ?? 'Chưa phân vùng' }}
                                         </span>
@@ -207,11 +204,11 @@
                                 </td>
                                 <td class="p-4 align-middle text-center">
                                     @if($ctv->trang_thai_khoa)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 uppercase">
+                                        <span class="ops-badge ops-badge-red py-1 text-[10px] uppercase">
                                             <i class="fa-solid fa-user-slash mr-1"></i> Bị khóa
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 uppercase">
+                                        <span class="ops-badge ops-badge-green py-1 text-[10px] uppercase">
                                             <i class="fa-solid fa-user-check mr-1"></i> Hoạt động
                                         </span>
                                     @endif
@@ -222,14 +219,14 @@
                                         @if($ctv->trang_thai_khoa)
                                             <form action="{{ route('admin.ctv.toggle_lock', $ctv->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn mở khóa tài khoản CTV {{ $ctv->ho_ten }}? Họ sẽ có thể tiếp tục truy cập hệ thống.');">
                                                 @csrf
-                                                <button type="submit" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg text-xs font-bold transition-all border border-emerald-200 hover:border-emerald-600 shadow-sm flex items-center gap-1">
+                                                <button type="submit" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-full text-xs font-bold transition-all border border-emerald-200 hover:border-emerald-600 shadow-sm flex items-center gap-1">
                                                     <i class="fa-solid fa-unlock"></i> Mở khóa
                                                 </button>
                                             </form>
                                         @else
                                             <form action="{{ route('admin.ctv.toggle_lock', $ctv->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn khóa tài khoản CTV {{ $ctv->ho_ten }}? Họ sẽ không thể đăng nhập hệ thống.');">
                                                 @csrf
-                                                <button type="submit" class="px-2.5 py-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-600 hover:text-white rounded-lg text-xs font-bold transition-all border border-yellow-200 hover:border-yellow-600 shadow-sm flex items-center gap-1">
+                                                <button type="submit" class="px-2.5 py-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-600 hover:text-white rounded-full text-xs font-bold transition-all border border-yellow-200 hover:border-yellow-600 shadow-sm flex items-center gap-1">
                                                     <i class="fa-solid fa-user-lock"></i> Khóa
                                                 </button>
                                             </form>
@@ -239,7 +236,7 @@
                                         <form action="{{ route('admin.nguoidung.destroy', $ctv->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản CTV {{ $ctv->ho_ten }}? Hành động này không thể hoàn tác.');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold transition-all border border-red-200 hover:border-red-600 shadow-sm flex items-center gap-1">
+                                            <button type="submit" class="px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-full text-xs font-bold transition-all border border-red-200 hover:border-red-600 shadow-sm flex items-center gap-1">
                                                 <i class="fa-solid fa-trash-can"></i> Xóa
                                             </button>
                                         </form>
